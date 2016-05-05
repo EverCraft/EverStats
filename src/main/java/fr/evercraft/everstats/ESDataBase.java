@@ -16,94 +16,73 @@
  */
 package fr.evercraft.everstats;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.service.economy.Currency;
-import org.spongepowered.api.service.economy.transaction.TransactionType;
-
+import fr.evercraft.elements.ESDeath;
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EDataBase;
 
 public class ESDataBase extends EDataBase<EverStats> {
-	private String table_account;
-	private String table_log;
-
+	private String table_death;
+	
 	public ESDataBase(EverStats plugin) {
 		super(plugin, true);
 	}
 
 	public boolean init() throws ServerDisableException {
-		this.table_account = "account";
-		String account = 	"CREATE TABLE IF NOT EXISTS <table> (" +
-							"`identifier` varchar(36) NOT NULL," +
-							"`currency` varchar(36) NOT NULL," +
-							"`balance` DECIMAL NOT NULL," +
-							"PRIMARY KEY (`identifier`, `currency`));";
-		initTable(this.getTableAccount(), account);
-		
-		this.table_log = "log";
-		String log = 		"CREATE TABLE IF NOT EXISTS <table> (" +
-							"`id` MEDIUMINT NOT NULL AUTO_INCREMENT," +
-							"`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP," +
-							"`identifier` varchar(36) NOT NULL," +
-							"`currency` varchar(36) NOT NULL," +
-							"`before` DECIMAL NOT NULL," +
-							"`after` DECIMAL NOT NULL," +
-							"`transaction` varchar(50) NOT NULL," +
-							"`to` varchar(36)," +
-							"`cause` varchar(255) NOT NULL," +
-							"PRIMARY KEY (`id`));";
-		initTable(this.getTableLog(), log);
-		
+		this.table_death = "death";
+		String death = 	"CREATE TABLE IF NOT EXISTS `" + this.table_death + "` (" +
+				"`id` int(11) NOT NULL AUTO_INCREMENT," +
+				"`victim` varchar(36) NOT NULL," +
+				"`killer` varchar(36)," +
+				"`reason` varchar(36)," +
+				"`time` timestamp NOT NULL," +
+				"PRIMARY KEY (`id`));";
+		initTable(this.getTableDeath(), death);
 		return true;
 	}
 	
-	public String getTableAccount() {
-		return this.getPrefix() + this.table_account;
-	}
-	
-	public String getTableLog() {
-		return this.getPrefix() + this.table_log;
-	}
-	
-	public void log(final String identifier, final Currency currency, final BigDecimal before, final BigDecimal after, final TransactionType transaction, final Cause cause, final String to) {
+	public boolean saveDeath(ESDeath kill){
+		boolean resultat = false;
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
+		String query = "INSERT INTO `" + this.table_death + "` (`killer`, `victim`, `reason`, `time`) VALUES(?, ?, ?, ?);";
 		try {
-			connection = this.plugin.getDataBases().getConnection();
-			String query = 	  "INSERT INTO `" + this.getTableLog() + "` "
-							+ "(`identifier`, `currency`, `before`, `after`, `transaction`, `to`, `cause`) "
-							+ "VALUES (?, ?, ?, ?, ?, ?, ?);";
+			connection = getConnection();
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, identifier);
-			preparedStatement.setString(2, currency.getId());
-			preparedStatement.setBigDecimal(3, before);
-			preparedStatement.setBigDecimal(4, after);
-			preparedStatement.setString(5, transaction.getName());
-			preparedStatement.setString(6, to);
-			preparedStatement.setString(7, String.join(", ", cause.getNamedCauses().keySet()));
-			
-			preparedStatement.execute();
-			this.plugin.getLogger().debug("Log : (identifier='" + identifier + "';"
-													+ "currency='" + currency.getId() + "';"
-													+ "before='" + before + "';"
-													+ "after='" + after + "';"
-													+ "transaction='" + transaction.getName() + "';"
-													+ "to='" + to + "';"
-													+ "cause='" + String.join(", ", cause.getNamedCauses().keySet()) + "')");
+			if (kill.getKiller() != null){
+				preparedStatement.setString(1, kill.getKiller().getUniqueId().toString());
+			} else {
+				preparedStatement.setString(1, null);
+			}
+			preparedStatement.setString(2, kill.getVictim().getUniqueId().toString());
+			if (kill.getReason() != null){
+				preparedStatement.setString(3, kill.getReason().toString());
+			} else {
+				preparedStatement.setString(3, null);
+			}
+			preparedStatement.setString(4, kill.getTime().toString());
+			resultat = preparedStatement.execute();
+			connection.close();
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of log : " + e.getMessage());
+	    	this.plugin.getLogger().warn("Error during a change of log : (identifier:'" + query + "'): " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
 			try {
-				if (preparedStatement != null) preparedStatement.close();
-				if (connection != null) connection.close();
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
 			} catch (SQLException e) {}
 	    }
+		return resultat;
+	}
+	
+	public String getTableDeath() {
+		return this.getPrefix() + this.table_death;
 	}
 }
