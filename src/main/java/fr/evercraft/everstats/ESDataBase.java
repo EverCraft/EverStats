@@ -39,7 +39,7 @@ public class ESDataBase extends EDataBase<EverStats> {
 
 	public boolean init() throws ServerDisableException {
 		this.table_death = "death";
-		String death = "CREATE TABLE IF NOT EXISTS `" + this.table_death + "` (" + 
+		String death = "CREATE TABLE IF NOT EXISTS <table> (" + 
 				"`id` int(11) NOT NULL AUTO_INCREMENT," + 
 				"`victim` varchar(36) NOT NULL," + 
 				"`killer` varchar(36)," + 
@@ -54,7 +54,7 @@ public class ESDataBase extends EDataBase<EverStats> {
 		boolean resultat = false;
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String query = "INSERT INTO `" + this.table_death + "` (`killer`, `victim`, `reason`, `time`) VALUES(?, ?, ?, ?);";
+		String query = "INSERT INTO `" + this.getTableDeath() + "` (`killer`, `victim`, `reason`, `time`) VALUES(?, ?, ?, ?);";
 		try {
 			connection = getConnection();
 			preparedStatement = connection.prepareStatement(query);
@@ -98,8 +98,8 @@ public class ESDataBase extends EDataBase<EverStats> {
 		ResultSet resultat;
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
-		String query = "SELECT COUNT(*) FROM `" 
-			+ this.table_death + "` "
+		String query = "SELECT COUNT(*) "
+			+ "FROM `" + this.getTableDeath() + "` "
 			+ "WHERE victim=`?` AND killer=`?` AND time>=`?`"
 			+ ";";
 		try {
