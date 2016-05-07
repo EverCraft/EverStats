@@ -28,11 +28,14 @@ public class ESMessage extends EMessage {
 	public void loadDefault() {
 		// Prefix
 		addDefault("prefix", "[&4Ever&6&lStats&f] ");
+		addDefault("message.PlayerSpawnkill", "&7Votre meurtre n'a pas été ajouté à vos statistiques car vous avez tué ce joueur il y a moins de &6<time> &7minutes");
+     	
 	}
 
 	@Override
 	public void loadConfig() {
 		// Prefix
 		addMessage("PREFIX", "prefix");
+		addMessage("PLAYER_SPAWNKILL", "message.PlayerSpawnkill");
 	}
 }

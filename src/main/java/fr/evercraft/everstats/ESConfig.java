@@ -41,5 +41,8 @@ public class ESConfig extends EConfig {
 		addDefault("SQL.enable", false);
 		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
 		addDefault("SQL.prefix", "everstats_");
+		
+		// Default cooldown in seconds
+		addDefault("config.cooldown", 500);
 	}
 }

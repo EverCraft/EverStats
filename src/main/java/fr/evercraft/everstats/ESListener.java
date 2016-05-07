@@ -16,6 +16,7 @@
  */
 package fr.evercraft.everstats;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.spongepowered.api.entity.Entity;
@@ -26,6 +27,10 @@ import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 
+import fr.evercraft.elements.ESDeath;
+import fr.evercraft.everapi.java.UtilsDate;
+import fr.evercraft.everapi.plugin.EChat;
+
 public class ESListener {
 	private EverStats plugin;
 
@@ -34,24 +39,36 @@ public class ESListener {
 	}
 
 	@Listener
-	public void onEntityDeath(DestructEntityEvent.Death event) {
-		Optional<EntityDamageSource> optDamageSource = event.getCause().first(EntityDamageSource.class);
-		if (optDamageSource.isPresent()) {
-			EntityDamageSource damageSource = optDamageSource.get();
-			if (event.getTargetEntity() instanceof Player){
-				Player victim = (Player) event.getTargetEntity();
+	public void onEntityDeath(DestructEntityEvent event) {
+		if (event.getTargetEntity() instanceof Player) {
+			Player victim = (Player) event.getTargetEntity();
+			Optional<EntityDamageSource> optDamageSource = event.getCause().first(EntityDamageSource.class);
+			if (optDamageSource.isPresent()) {
+				EntityDamageSource damageSource = optDamageSource.get();
+				this.plugin.getEServer().broadcast(damageSource.toString());
 				DamageType reason = damageSource.getType();
-				if (damageSource.getSource() instanceof Player){
+				if (damageSource.getSource() instanceof Player) {
 					Player killer = (Player) damageSource.getSource();
-					if (victim != killer){
-						
+					if (victim != killer) {
+						Integer cooldown = this.plugin.getConfigs().get("config.cooldown").getInt();
+						if (this.plugin.getDataBases().check(victim.getUniqueId(), killer.getUniqueId(), new Date(System.currentTimeMillis() - cooldown * 1000))){
+							this.plugin.getDataBases().saveDeath(new ESDeath(victim, killer, reason, UtilsDate.getTimestamp()));
+						} else {
+							killer.sendMessage(EChat.of(this.plugin.getMessages().getMessagePrefix() 
+									+ this.plugin.getMessages().getMessage("PLAYER_SPAWNKILL")));
+						}
 					}
-				} else if (damageSource.getSource() instanceof Creature){
+				} else if (damageSource.getSource() instanceof Creature) {
 					Entity killer = damageSource.getSource();
+					this.plugin.getDataBases().saveDeath(new ESDeath(killer, victim, reason, UtilsDate.getTimestamp()));
 				} else {
 					Entity killer = null;
+					this.plugin.getDataBases().saveDeath(new ESDeath(killer, victim, reason, UtilsDate.getTimestamp()));
 				}
-			}
+			} /*else {
+				Entity killer = null;
+				this.plugin.getDataBases().saveDeath(new ESDeath(killer, victim, reason, UtilsDate.getTimestamp()));
+			}*/
 		}
 	}
 }
