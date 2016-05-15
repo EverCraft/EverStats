@@ -16,7 +16,7 @@
  */
 package fr.evercraft.everstats;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.Optional;
 
 import org.spongepowered.api.entity.Entity;
@@ -51,7 +51,7 @@ public class ESListener {
 					Player killer = (Player) damageSource.getSource();
 					if (victim != killer) {
 						Integer cooldown = this.plugin.getConfigs().get("config.cooldown").getInt();
-						if (this.plugin.getDataBases().check(victim.getUniqueId(), killer.getUniqueId(), new Date(System.currentTimeMillis() - cooldown * 1000))){
+						if (this.plugin.getDataBases().check(victim.getUniqueId(), killer.getUniqueId(), System.currentTimeMillis() - cooldown * 1000)){
 							this.plugin.getDataBases().saveDeath(new ESDeath(victim, killer, reason, UtilsDate.getTimestamp()));
 						} else {
 							killer.sendMessage(EChat.of(this.plugin.getMessages().getMessagePrefix() 
