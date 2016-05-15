@@ -92,20 +92,20 @@ public class ESDataBase extends EDataBase<EverStats> {
 		return resultat;
 	}
 	
-	public boolean check(UUID victim, UUID killer, long time){
+	public boolean check(UUID victim, UUID killer, Timestamp time){
 		boolean check = false;
 		ResultSet resultat;
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
 		String query = "SELECT COUNT(*) "
 			+ "FROM `" + this.getTableDeath() + "` "
-			+ "WHERE `victim` = ? AND `killer` = ? AND `time` >= ?;";
+			+ "WHERE victim = '?'  AND killer = '?' AND time >= '?';";
 		try {
 			connection = getConnection();
 			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setObject(1, victim);
-			preparedStatement.setString(2, killer.toString());
-			preparedStatement.setTimestamp(3, new Timestamp(time));
+			preparedStatement.setString(0, victim.toString());
+			preparedStatement.setString(1, killer.toString());
+			preparedStatement.setTimestamp(2, time);
 			resultat = preparedStatement.executeQuery();
 			this.plugin.getEServer().broadcast(preparedStatement.toString());
 			connection.close();
