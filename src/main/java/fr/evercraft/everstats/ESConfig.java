@@ -16,6 +16,8 @@
  */
 package fr.evercraft.everstats;
 
+import java.util.Arrays;
+
 import fr.evercraft.everapi.plugin.file.EConfig;
 import fr.evercraft.everapi.plugin.file.EMessage;
 
@@ -41,6 +43,9 @@ public class ESConfig extends EConfig {
 		addDefault("SQL.enable", false);
 		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
 		addDefault("SQL.prefix", "everstats_");
+		addDefault("top.banned", Arrays.asList(
+				"86f8f95b-e5e6-45c4-bf85-4d64dbd0903f", 
+				"f3345769-4c70-4a9f-9db9-bdb8f9e8a46c"));
 		
 		// Default cooldown in seconds
 		addDefault("config.cooldown", 500);

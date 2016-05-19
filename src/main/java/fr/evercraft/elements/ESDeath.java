@@ -30,14 +30,14 @@ public class ESDeath{
 	private DamageType reason;
 	private Timestamp time;
 	
-	public ESDeath(Entity killer, Player victim, DamageType cause, Timestamp time) {
+	public ESDeath(Player victim, Entity killer, DamageType cause, Timestamp time) {
 		this.killer = killer;
 		this.victim = victim;
 		this.reason = cause;
 		this.time = time;
 	}
 	
-	public ESDeath(Player killer, Player victim, DamageType cause, Timestamp time) {
+	public ESDeath(Player victim, Player killer, DamageType cause, Timestamp time) {
 		this.killer = killer;
 		this.victim = victim;
 		this.reason = cause;

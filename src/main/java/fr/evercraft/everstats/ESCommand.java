@@ -36,7 +36,7 @@ public class ESCommand extends ECommand<EverStats> {
     }
 	
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(this.plugin.getPermissions().get("EVERSTATS"));
+		return source.hasPermission(this.plugin.getPermissions().get("HELP"));
 	}
 
 	public Text description(final CommandSource source) {
@@ -56,48 +56,19 @@ public class ESCommand extends ECommand<EverStats> {
 	public Text help(final CommandSource source) {
 		boolean help = source.hasPermission(this.plugin.getPermissions().get("HELP"));
 		boolean reload = source.hasPermission(this.plugin.getPermissions().get("RELOAD"));
-		boolean give = source.hasPermission(this.plugin.getPermissions().get("GIVE"));
-		boolean take = source.hasPermission(this.plugin.getPermissions().get("TAKE"));
-		boolean reset = source.hasPermission(this.plugin.getPermissions().get("RESET"));
-		boolean log = source.hasPermission(this.plugin.getPermissions().get("LOG"));
 
 		Builder build;
-		if(help || reload || give || take || reset || log){
+		if(help || reload){
 			build = Text.builder("/eco <");
 			if(help){
 				build = build.append(Text.builder("help").onClick(TextActions.suggestCommand("/eco help")).build());
-				if(reload || give || take || reset || log){
+				if(reload){
 					build = build.append(Text.builder("|").build());
 				}
 			}
 			if(reload){
 				build = build.append(Text.builder("reload").onClick(TextActions.suggestCommand("/eco reload")).build());
-				if(give || take || reset || log){
-					build = build.append(Text.builder("|").build());
-				}
 			}
-			if(give){
-				build = build.append(Text.builder("give").onClick(TextActions.suggestCommand("/eco give ")).build());
-				if(take || reset || log){
-					build = build.append(Text.builder("|").build());
-				}
-			}
-			if(take){
-				build = build.append(Text.builder("take").onClick(TextActions.suggestCommand("/eco take ")).build());
-				if(reset || log){
-					build = build.append(Text.builder("|").build());
-				}
-			}
-			if(reset){
-				build = build.append(Text.builder("reset").onClick(TextActions.suggestCommand("/eco reset ")).build());
-				if(log){
-					build = build.append(Text.builder("|").build());
-				}
-			}
-			if(log){
-				build = build.append(Text.builder("log").onClick(TextActions.suggestCommand("/eco log ")).build());
-			}
-			build = build.append(Text.builder(">").build());
 		} else {
 			build = Text.builder("/eco").onClick(TextActions.suggestCommand("/eco"));
 		}
