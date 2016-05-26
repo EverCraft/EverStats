@@ -26,6 +26,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
+import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.ECommand;
 
@@ -86,7 +87,7 @@ public class ESCommand extends ECommand<EverStats> {
 				resultat = commandHelp(source);
 			// Il n'a pas la permission
 			} else {
-				source.sendMessage(this.plugin.getPermissions().noPermission());
+				source.sendMessage(EAMessages.NO_PERMISSION.getText());
 			}
 		// RELOAD
 		} else if(args.size() == 1 && args.get(0).equals("reload")) {
@@ -95,7 +96,7 @@ public class ESCommand extends ECommand<EverStats> {
 				resultat = commandReload(source);
 			// Il n'a pas la permission
 			} else {
-				source.sendMessage(this.plugin.getPermissions().noPermission());
+				source.sendMessage(EAMessages.NO_PERMISSION.getText());
 			}
 		// Nombre d'argument incorrect
 		} else {
