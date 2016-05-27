@@ -35,7 +35,7 @@ public class EverStats extends EPlugin {
 
 	private ESConfig configs;
 	private ESMessage messages;
-	private ESPermission permissions;
+	
 	private ESDataBase databases;
 	
 	@Override
@@ -43,7 +43,6 @@ public class EverStats extends EPlugin {
 		// Configurations
 		this.configs = new ESConfig(this);
 		this.messages = new ESMessage(this);
-		this.permissions = new ESPermission(this);
 		
 		// MySQL
 		this.databases = new ESDataBase(this);
@@ -81,10 +80,6 @@ public class EverStats extends EPlugin {
 	
 	public ESMessage getMessages(){
 		return this.messages;
-	}
-	
-	public ESPermission getPermissions(){
-		return this.permissions;
 	}
 	
 	public ESDataBase getDataBases(){

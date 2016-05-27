@@ -29,6 +29,7 @@ import org.spongepowered.api.event.entity.DestructEntityEvent;
 import fr.evercraft.elements.ESDeath;
 import fr.evercraft.everapi.java.UtilsDate;
 import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everstats.ESMessage.ESMessages;
 
 public class ESListener {
 	private EverStats plugin;
@@ -54,8 +55,8 @@ public class ESListener {
 							if (this.plugin.getDataBases().check(victim.getUniqueId(), killer.getUniqueId(), System.currentTimeMillis() - cooldown * 1000)){
 								this.plugin.getDataBases().saveDeath(new ESDeath(victim, killer, reason, UtilsDate.getTimestamp()));
 							} else {
-								killer.sendMessage(EChat.of(this.plugin.getMessages().getMessagePrefix() 
-										+ this.plugin.getMessages().getMessage("PLAYER_SPAWNKILL").replaceAll("<time>", cooldown.toString())));
+								killer.sendMessage(EChat.of(ESMessages.PREFIX
+										+ ESMessages.PLAYER_SPAWNKILL.get().replaceAll("<time>", cooldown.toString())));
 							}
 						}
 					} else {

@@ -29,6 +29,7 @@ import org.spongepowered.api.text.format.TextColors;
 import fr.evercraft.everapi.EAMessage.EAMessages;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.ECommand;
+import fr.evercraft.everstats.ESMessage.ESMessages;
 
 public class ESCommand extends ECommand<EverStats> {
 	
@@ -37,17 +38,17 @@ public class ESCommand extends ECommand<EverStats> {
     }
 	
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(this.plugin.getPermissions().get("HELP"));
+		return source.hasPermission(ESPermissions.HELP.get());
 	}
 
 	public Text description(final CommandSource source) {
-		return EChat.of(this.plugin.getMessages().getMessage("DESCRIPTION"));
+		return ESMessages.DESCRIPTION.getText();
 	}
 	
 	public List<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
 		List<String> suggests = new ArrayList<String>();
 		if(args.size() == 1){
-			if(source.hasPermission(this.plugin.getPermissions().get("HELP"))){
+			if(source.hasPermission(ESPermissions.HELP.get())){
 				suggests.add("help");
 			}
 		}
@@ -55,8 +56,8 @@ public class ESCommand extends ECommand<EverStats> {
 	}
 
 	public Text help(final CommandSource source) {
-		boolean help = source.hasPermission(this.plugin.getPermissions().get("HELP"));
-		boolean reload = source.hasPermission(this.plugin.getPermissions().get("RELOAD"));
+		boolean help = source.hasPermission(ESPermissions.HELP.get());
+		boolean reload = source.hasPermission(ESPermissions.RELOAD.get());
 
 		Builder build;
 		if(help || reload){
@@ -83,7 +84,7 @@ public class ESCommand extends ECommand<EverStats> {
 		// HELP
 		if(args.size() == 0 || (args.size() == 1 && args.get(0).equals("help"))) {
 			// Si il a la permission
-			if(source.hasPermission(this.plugin.getPermissions().get("HELP"))){
+			if(source.hasPermission(ESPermissions.HELP.get())){
 				resultat = commandHelp(source);
 			// Il n'a pas la permission
 			} else {
@@ -92,7 +93,7 @@ public class ESCommand extends ECommand<EverStats> {
 		// RELOAD
 		} else if(args.size() == 1 && args.get(0).equals("reload")) {
 			// Si il a la permission
-			if(source.hasPermission(this.plugin.getPermissions().get("RELOAD"))){
+			if(source.hasPermission(ESPermissions.RELOAD.get())){
 				resultat = commandReload(source);
 			// Il n'a pas la permission
 			} else {
@@ -107,7 +108,7 @@ public class ESCommand extends ECommand<EverStats> {
 
 	private boolean commandReload(final CommandSource player) {
 		this.plugin.reload();
-		player.sendMessage(EChat.of(this.plugin.getMessages().getMessage("PREFIX") + this.plugin.getEverAPI().getMessages().getMessage("RELOAD_COMMAND")));
+		player.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.RELOAD_COMMAND.get()));
 		return true;
 	}
 	
