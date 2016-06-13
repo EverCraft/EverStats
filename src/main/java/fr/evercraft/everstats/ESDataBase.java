@@ -539,4 +539,8 @@ public class ESDataBase extends EDataBase<EverStats> {
 	public String getTableDeath() {
 		return this.getPrefix() + this.table_death;
 	}
+
+	public String getBanned() {
+		return this.banned;
+	}
 }
