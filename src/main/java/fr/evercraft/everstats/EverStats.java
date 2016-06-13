@@ -24,12 +24,12 @@ import fr.evercraft.everapi.plugin.EPlugin;
 
 @Plugin(id = "fr.evercraft.everstats", 
 		name = "EverStats", 
-		version = "1.1", 
+		version = "1.2", 
 		description = "Stats",
 		url = "http://evercraft.fr/",
 		authors = {"rexbut","lesbleu"},
 		dependencies = {
-		    @Dependency(id = "fr.evercraft.everapi", version = "1.1")
+		    @Dependency(id = "fr.evercraft.everapi", version = "1.2")
 		})
 public class EverStats extends EPlugin {
 
