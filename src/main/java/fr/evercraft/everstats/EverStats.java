@@ -21,6 +21,9 @@ import org.spongepowered.api.plugin.Plugin;
 
 import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
+import fr.evercraft.everapi.services.stats.StatsService;
+import fr.evercraft.everstats.service.EStatsService;
+import fr.evercraft.everstats.service.ManagerEvent;
 
 @Plugin(id = "fr.evercraft.everstats", 
 		name = "EverStats", 
@@ -37,6 +40,8 @@ public class EverStats extends EPlugin {
 	private ESMessage messages;
 	
 	private ESDataBase databases;
+	private EStatsService service;
+	private ManagerEvent event;
 	
 	@Override
 	protected void onPreEnable() throws PluginDisableException {
@@ -49,6 +54,10 @@ public class EverStats extends EPlugin {
 		if(!this.databases.isEnable()) {
 			throw new PluginDisableException("This plugin requires a database");
 		}
+		
+		this.event = new ManagerEvent(this);
+		this.service = new EStatsService(this);
+		this.getGame().getServiceManager().setProvider(this, StatsService.class, this.service);
 	}
 	
 	@Override
@@ -64,10 +73,13 @@ public class EverStats extends EPlugin {
 	protected void onReload() throws PluginDisableException {
 		// Configurations
 		this.reloadConfigurations();
+		
 		this.databases.reload();
 		if(!this.databases.isEnable()) {
 			throw new PluginDisableException("This plugin requires a database");
 		}
+		
+		this.service.reload();
 	}
 	
 	@Override
@@ -84,5 +96,13 @@ public class EverStats extends EPlugin {
 	
 	public ESDataBase getDataBases(){
 		return this.databases;
+	}
+
+	public EStatsService getService() {
+		return this.service;
+	}
+
+	public ManagerEvent getManagerEvent() {
+		return this.event;
 	}
 }

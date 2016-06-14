@@ -18,7 +18,6 @@ package fr.evercraft.everstats;
 
 import java.util.Optional;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -26,9 +25,8 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 
-import fr.evercraft.elements.ESDeath;
-import fr.evercraft.everapi.java.UtilsDate;
 import fr.evercraft.everapi.plugin.EChat;
+import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everstats.ESMessage.ESMessages;
 
 public class ESListener {
@@ -44,28 +42,27 @@ public class ESListener {
 			Player victim = (Player) event.getTargetEntity();
 			Optional<DamageSource> optDamageSource = event.getCause().first(DamageSource.class);
 			if (optDamageSource.isPresent()) {
-				DamageSource damageSource = optDamageSource.get();
-				if (damageSource instanceof EntityDamageSource){
-					EntityDamageSource entityDamage = (EntityDamageSource) optDamageSource.get();
-					DamageType reason = damageSource.getType();
-					if (entityDamage.getSource() instanceof Player) {
-						Player killer = (Player) entityDamage.getSource();
-						if (victim != killer) {
-							Integer cooldown = this.plugin.getConfigs().get("config.cooldown").getInt();
-							if (this.plugin.getDataBases().check(victim.getUniqueId(), killer.getUniqueId(), System.currentTimeMillis() - cooldown * 1000)){
-								this.plugin.getDataBases().saveDeath(new ESDeath(victim, killer, reason, UtilsDate.getTimestamp()));
-							} else {
-								killer.sendMessage(EChat.of(ESMessages.PREFIX
-										+ ESMessages.PLAYER_SPAWNKILL.get().replaceAll("<time>", cooldown.toString())));
+				
+				Optional<EPlayer> victim_player = this.plugin.getEServer().getEPlayer(victim);
+				if(victim_player.isPresent()) {
+					DamageSource damageSource = optDamageSource.get();
+					if (damageSource instanceof EntityDamageSource){
+						EntityDamageSource entityDamage = (EntityDamageSource) optDamageSource.get();
+						DamageType reason = damageSource.getType();
+						if (entityDamage.getSource() instanceof Player) {
+							Player killer = (Player) entityDamage.getSource();
+							if (!victim.equals(killer)) {
+								if(!victim_player.get().addDeath(killer, reason, System.currentTimeMillis())) {
+									killer.sendMessage(EChat.of(ESMessages.PREFIX
+											+ ESMessages.PLAYER_SPAWNKILL.get().replaceAll("<time>", this.plugin.getService().getCooldown().toString())));
+								}
 							}
+						} else {
+							victim_player.get().addDeath(entityDamage.getSource(), reason, System.currentTimeMillis());
 						}
 					} else {
-						Entity killer = entityDamage.getSource();
-						this.plugin.getDataBases().saveDeath(new ESDeath(victim, killer, reason, UtilsDate.getTimestamp()));
+						victim_player.get().addDeath(damageSource.getType(), System.currentTimeMillis());
 					}
-				} else {
-					Entity killer = null;
-					this.plugin.getDataBases().saveDeath(new ESDeath(victim, killer, damageSource.getType(), UtilsDate.getTimestamp()));
 				}
 			}
 		}	

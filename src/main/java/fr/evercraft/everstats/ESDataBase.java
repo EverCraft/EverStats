@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import org.spongepowered.api.entity.living.player.Player;
 
-import fr.evercraft.elements.ESDeath;
 import fr.evercraft.elements.ESInformation;
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EDataBase;
@@ -55,51 +54,6 @@ public class ESDataBase extends EDataBase<EverStats> {
 				"PRIMARY KEY (`id`));";
 		initTable(this.getTableDeath(), death);
 		return true;
-	}
-
-	public boolean saveDeath(ESDeath death) {
-		boolean resultat = false;
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		String query = "INSERT INTO `" + this.getTableDeath() + 
-				"` (`killer`, `victim`, `reason`, `time`) "
-				+ "VALUES(?, ?, ?, ?);";
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			if (death.getKiller() != null) {
-				if (death.getKiller() instanceof Player){
-					preparedStatement.setString(1, death.getKiller().getUniqueId().toString());
-				} else {
-					preparedStatement.setString(1, death.getKiller().getType().getName());
-				}
-			} else {
-				preparedStatement.setString(1, null);
-			}
-			preparedStatement.setString(2, death.getVictim().getUniqueId().toString());
-			if (death.getReason() != null) {
-				preparedStatement.setString(3, death.getReason().getName());
-			} else {
-				preparedStatement.setString(3, null);
-			}
-			preparedStatement.setString(4, death.getTime().toString());
-			resultat = preparedStatement.execute();
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during saving : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}
-		}
-		return resultat;
 	}
 	
 	public boolean check(UUID victim, UUID killer, long time){
@@ -314,54 +268,7 @@ public class ESDataBase extends EDataBase<EverStats> {
 			} catch (SQLException e) {}	
 		}
 		return new ArrayList<Map.Entry<UUID, Double>>(data.entrySet());
-	  }	
-	
-	public ESInformation infoMonthly(Player player) {
-		ESInformation data = null;
-		String query = "SELECT v.victim, k.killer "
-				+ "FROM ("
-					+ "SELECT count(*) as killer "
-					+ "FROM " + this.getTableDeath() + " " 
-					+ "WHERE killer = ? "
-					+ "AND MONTH(time) = MONTH(NOW()) "
-					+ "AND YEAR(time) = YEAR(NOW()) "
-					+ "AND `victim` NOT IN " + this.banned + " "
-				+ ") k, ("
-					+ "SELECT count(*) as victim "
-					+ "FROM everstats "
-					+ "WHERE victim = ? "
-					+ "AND MONTH(time) = MONTH(NOW()) "
-					+ "AND YEAR(time) = YEAR(NOW()) "
-					+ "AND `killer` NOT IN " + this.banned + " "
-				+ ") v ;";
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, player.getUniqueId().toString());
-			preparedStatement.setString(2, player.getUniqueId().toString());
-			ResultSet result = preparedStatement.executeQuery();
-			if (result.next()){
-				data = new ESInformation(result.getInt("killer"), result.getInt("victim"));
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during infoMonthly : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return data;
-	}
+	}	
 	
 	public ArrayList<Map.Entry<UUID, Double>> topKillMonthly(Integer count) {
 		Map<UUID, Double> data = new HashMap<UUID, Double>();

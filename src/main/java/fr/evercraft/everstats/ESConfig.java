@@ -50,4 +50,8 @@ public class ESConfig extends EConfig {
 		// Default cooldown in seconds
 		addDefault("config.cooldown", 500);
 	}
+
+	public long getCooldown() {
+		return this.get("config.cooldown").getLong(500);
+	}
 }

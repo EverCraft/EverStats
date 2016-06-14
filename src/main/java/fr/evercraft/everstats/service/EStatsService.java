@@ -34,6 +34,7 @@ package fr.evercraft.everstats.service;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,6 +59,11 @@ public class EStatsService implements StatsService {
 	
 	private final ConcurrentMap<UUID, ESubject> subjects;
 	private final LoadingCache<UUID, ESubject> cache;
+	
+	/**
+	 * En Seconde
+	 */
+	private Long cooldown;
 
 	public EStatsService(final EverStats plugin) {		
 		this.plugin = plugin;
@@ -91,20 +97,25 @@ public class EStatsService implements StatsService {
 					            return subject;
 					        }
 					    });
+		this.reload();
 	}
 
 	@Override
-	public ESubject get(UUID uuid) {
+	public Optional<StatsSubject> get(UUID uuid) {
+		return Optional.ofNullable(this.getSubject(uuid).orElse(null));
+	}
+	
+	public Optional<ESubject> getSubject(UUID uuid) {
 		Preconditions.checkNotNull(uuid, "uuid");
 		
 		try {
 			if(!this.subjects.containsKey(uuid)) {
-				return this.cache.get(uuid);
+				return Optional.ofNullable(this.cache.get(uuid));
 	    	}
-	    	return this.subjects.get(uuid);
+	    	return Optional.ofNullable(this.subjects.get(uuid));
 		} catch (ExecutionException e) {
 			this.plugin.getLogger().warn("Error : Loading user (identifier='" + uuid + "';message='" + e.getMessage() + "')");
-			return null;
+			return Optional.empty();
 		}
 	}
 	
@@ -126,6 +137,8 @@ public class EStatsService implements StatsService {
 		for(ESubject subject : this.subjects.values()) {
 			subject.reload();
 		}
+		
+		this.cooldown = this.plugin.getConfigs().getCooldown();
 	}
 	
 	/**
@@ -172,5 +185,9 @@ public class EStatsService implements StatsService {
 		list.addAll(this.subjects.values());
 		list.addAll(this.cache.asMap().values());
 		return list;
+	}
+	
+	public Long getCooldown() {
+		return this.cooldown;
 	}
 }
