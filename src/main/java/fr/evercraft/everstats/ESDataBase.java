@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -449,5 +450,148 @@ public class ESDataBase extends EDataBase<EverStats> {
 
 	public String getBanned() {
 		return this.banned;
+	}
+	
+	public LinkedHashMap<UUID, Integer> getTopDeaths(int count, Long time) {
+		LinkedHashMap<UUID, Integer> players = new LinkedHashMap<UUID, Integer>();
+		String query =    "SELECT `victim`, count(*) as `death` "
+						+ "FROM " + this.getTableDeath() + " "
+						+ "WHERE `time` >= ? "
+						+ "AND `killer` NOT IN " + this.banned + " "
+						+ "AND `victim` NOT IN " + this.banned + " "
+						+ "GROUP BY `victim` "
+						+ "ORDER BY `death` DESC "
+						+ "LIMIT " + count + " ;";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		try {
+			connection = getConnection();
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setTimestamp(1, new Timestamp(time));
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()){
+				players.put(UUID.fromString(result.getString("victim")), result.getInt("death"));
+			}
+			connection.close();
+		} catch (SQLException e) {
+			this.plugin.getLogger().warn("Error during TopDeath (time='" + time + "';count='" + count + "') : " + e.getMessage());
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {}	
+		}
+		return players;
+	}
+
+	public LinkedHashMap<UUID, Integer> getTopKills(int count, Long time) {
+		LinkedHashMap<UUID, Integer> players = new LinkedHashMap<UUID, Integer>();
+		String query = 	  "SELECT `killer`, count(*) as `kill` "
+						+ "FROM " + this.getTableDeath() + " "
+						+ "WHERE `time` >= ? "
+						+ "AND `killer` != `victim`"
+						+ "AND `victim` NOT IN " + this.getBanned() + " "
+						+ "AND `killer` NOT IN " + this.getBanned() + " "
+						+ "GROUP BY `killer` "
+						+ "HAVING `killer` IS NOT NULL "
+						+ "ORDER BY `kill` DESC "
+						+ "LIMIT " + count + " ;";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		try {
+			connection = getConnection();
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setTimestamp(1, new Timestamp(time));
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()){
+				players.put(UUID.fromString(result.getString("killer")), result.getInt("kill"));
+			}
+		} catch (SQLException e) {
+			this.plugin.getLogger().warn("Error during TopKill (time='" + time + "';count='" + count + "') : " + e.getMessage());
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {}	
+		}
+		return players;
+	}
+	
+	public LinkedHashMap<UUID, Double> getTopRatio(int count, Long time) {
+		LinkedHashMap<UUID, Double> players = new LinkedHashMap<UUID, Double>();
+		String query =   "(SELECT v.victim as `uuid`, k.kill/v.death as `ratio` "
+						+ "FROM "
+							+ "(SELECT `victim`, count(*) as `death` "
+							+ "FROM " + this.getTableDeath() + " "
+							+ "WHERE `time` >= ? "
+							+ "AND `killer` NOT IN " + this.getBanned() + " "
+							+ "AND `victim` NOT IN " + this.getBanned() + " "
+							+ "GROUP BY `victim` "
+							+ "HAVING count(*) > 0) v, "
+							+ "(SELECT `killer`, count(*) as `kill` "
+							+ "FROM " + this.getTableDeath() + " "
+							+ "WHERE `time` >= ? "
+							+ "AND `victim` NOT IN " + this.getBanned() + " "
+							+ "AND `killer` NOT IN " + this.getBanned() + " "
+							+ "GROUP BY `killer` "
+							+ "HAVING `killer` IS NOT NULL) k "
+						+ "WHERE v.victim = k.killer) "
+				  	+ "UNION "
+				  		+ "(SELECT `killer`, count(*) as `ratio` "
+				  		+ "FROM " + this.getTableDeath() + " "
+				  		+ "WHERE `killer` NOT IN "
+				  			+ "(SELECT `victim` as `killer` "
+				  			+ "FROM " + this.getTableDeath() + " "
+				  			+ "WHERE `time` >= ? "
+				  			+ "AND `victim` NOT IN " + this.banned + " "
+							+ "AND `killer` NOT IN " + this.banned + " "
+				  			+ "GROUP BY `victim` ) "
+				  			+ "WHERE `time` >= ? "
+						+ "AND `victim` NOT IN " + this.banned + " "
+						+ "AND `killer` NOT IN " + this.banned + " "
+				  		+ "GROUP BY `killer`) "
+				  	+ "ORDER BY `ratio` DESC "
+				  	+ "LIMIT " + count + " ;";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		try {
+			connection = getConnection();
+			preparedStatement = connection.prepareStatement(query);
+			Timestamp timestamp = new Timestamp(time);
+			preparedStatement.setTimestamp(1, timestamp);
+			preparedStatement.setTimestamp(2, timestamp);
+			preparedStatement.setTimestamp(3, timestamp);
+			preparedStatement.setTimestamp(4, timestamp);
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()){
+				players.put(UUID.fromString(result.getString("uuid")), Math.ceil(result.getDouble("ratio")));
+			}
+		} catch (SQLException e) {
+			this.plugin.getLogger().warn("Error during TopRatio (time='" + time + "';count='" + count + "') : " + e.getMessage());
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {}	
+		}
+		return players;
 	}
 }

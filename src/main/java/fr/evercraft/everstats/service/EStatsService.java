@@ -34,6 +34,7 @@ package fr.evercraft.everstats.service;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -46,8 +47,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
 import fr.evercraft.everapi.java.Chronometer;
 import fr.evercraft.everapi.services.stats.StatsService;
@@ -72,16 +71,6 @@ public class EStatsService implements StatsService {
 		this.cache = CacheBuilder.newBuilder()
 					    .maximumSize(100)
 					    .expireAfterAccess(5, TimeUnit.MINUTES)
-					    .removalListener(new RemovalListener<UUID, ESubject>() {
-					    	/**
-					    	 * Supprime un joueur du cache
-					    	 */
-							@Override
-							public void onRemoval(RemovalNotification<UUID, ESubject> notification) {
-								//EssentialsSubject.this.plugin.getManagerEvent().post(notification.getValue(), PermUserEvent.Action.USER_REMOVED);
-							}
-					    	
-					    })
 					    .build(new CacheLoader<UUID, ESubject>() {
 					    	/**
 					    	 * Ajoute un joueur au cache
@@ -92,14 +81,16 @@ public class EStatsService implements StatsService {
 					        	
 					        	ESubject subject = new ESubject(EStatsService.this.plugin, uuid);
 					        	EStatsService.this.plugin.getLogger().debug("Loading user '" + uuid.toString() + "' in " +  chronometer.getMilliseconds().toString() + " ms");
-					            
-					            //EssentialsSubject.this.plugin.getManagerEvent().post(subject, PermUserEvent.Action.USER_ADDED);
 					            return subject;
 					        }
 					    });
 		this.reload();
 	}
 
+	public Long getCooldown() {
+		return this.cooldown;
+	}
+	
 	@Override
 	public Optional<StatsSubject> get(UUID uuid) {
 		return Optional.ofNullable(this.getSubject(uuid).orElse(null));
@@ -187,7 +178,46 @@ public class EStatsService implements StatsService {
 		return list;
 	}
 	
-	public Long getCooldown() {
-		return this.cooldown;
+	/*
+	 * Top
+	 */
+	
+	@Override
+	public LinkedHashMap<UUID, Integer> getTopDeaths(int count) {
+		return this.getTopKills(count, (long) 0);
+	}
+	
+	@Override
+	public LinkedHashMap<UUID, Integer> getTopDeaths(int count, Long time) {
+		Preconditions.checkNotNull(count, "count");
+		Preconditions.checkNotNull(time, "time");
+		
+		return this.plugin.getDataBases().getTopDeaths(count, time);
+	}
+	
+	@Override
+	public LinkedHashMap<UUID, Integer> getTopKills(int count) {
+		return this.getTopKills(count, (long) 0);
+	}
+	
+	@Override
+	public LinkedHashMap<UUID, Integer> getTopKills(int count, Long time) {
+		Preconditions.checkNotNull(count, "count");
+		Preconditions.checkNotNull(time, "time");
+		
+		return this.plugin.getDataBases().getTopKills(count, time);
+	}
+	
+	@Override
+	public LinkedHashMap<UUID, Double> getTopRatio(int count) {
+		return this.getTopRatio(count, (long) 0);
+	}
+	
+	@Override
+	public LinkedHashMap<UUID, Double> getTopRatio(int count, Long time) {
+		Preconditions.checkNotNull(count, "count");
+		Preconditions.checkNotNull(time, "time");
+		
+		return this.plugin.getDataBases().getTopRatio(count, time);
 	}
 }
