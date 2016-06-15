@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with EverStats.  If not, see <http://www.gnu.org/licenses/>.
  */
-package fr.evercraft.everstats.service;
+package fr.evercraft.everstats.service.event;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -27,8 +27,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
 import fr.evercraft.everapi.server.player.EPlayer;
-import fr.evercraft.everapi.services.stats.event.EDeathStatsEvent;
-import fr.evercraft.everapi.services.stats.event.EKillStatsEvent;
 import fr.evercraft.everstats.EverStats;
 
 public class ManagerEvent {
@@ -36,6 +34,11 @@ public class ManagerEvent {
 	
 	public ManagerEvent(EverStats plugin) {
 		this.plugin = plugin;
+	}
+	
+	public void reload() {
+		this.plugin.getLogger().debug("Event StatsReloadEvent");
+		this.plugin.getGame().getEventManager().post(new EStatsReloadEvent(Cause.source(this.plugin).build()));
 	}
 	
 	public void post(UUID uuid, Entity killer, DamageType cause, Long time) {
@@ -51,18 +54,18 @@ public class ManagerEvent {
 		}
 	}
 	
-	public void death(EPlayer victim, @Nullable Entity killer, DamageType damage, Long time) {
+	private void death(EPlayer victim, @Nullable Entity killer, DamageType damage, Long time) {
 		if(killer == null) {
-			this.plugin.getLogger().debug("Event StatsEvent.Death : (victim='" + victim.getUniqueId() + "';killer='null';damage='" + damage.getId() + "';time='" + time + "')");
-			this.plugin.getGame().getEventManager().post(new EDeathStatsEvent(victim, damage, time, Cause.source(this.plugin).build()));
+			this.plugin.getLogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='null';damage='" + damage.getId() + "';time='" + time + "')");
+			this.plugin.getGame().getEventManager().post(new EDeathStatsUserEvent(victim, damage, time, Cause.source(this.plugin).build()));
 		} else {
-			this.plugin.getLogger().debug("Event StatsEvent.Death : (victim='" + victim.getUniqueId() + "';killer='" + killer.getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
-			this.plugin.getGame().getEventManager().post(new EDeathStatsEvent(victim, killer, damage, time, Cause.source(this.plugin).build()));
+			this.plugin.getLogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='" + killer.getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
+			this.plugin.getGame().getEventManager().post(new EDeathStatsUserEvent(victim, killer, damage, time, Cause.source(this.plugin).build()));
 		}
 	}
 
-	public void kill(EPlayer victim, EPlayer killer, DamageType damage, Long time) {
-		this.plugin.getLogger().debug("Event StatsEvent.kill : (victim='" + victim.getUniqueId() + "';killer='" + killer.getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
-		this.plugin.getGame().getEventManager().post(new EKillStatsEvent(victim, killer, damage, time, Cause.source(this.plugin).build()));
+	private void kill(EPlayer victim, EPlayer killer, DamageType damage, Long time) {
+		this.plugin.getLogger().debug("Event StatsUserEvent.kill : (victim='" + victim.getUniqueId() + "';killer='" + killer.getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
+		this.plugin.getGame().getEventManager().post(new EKillStatsUserEvent(victim, killer, damage, time, Cause.source(this.plugin).build()));
 	}
 }

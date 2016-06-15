@@ -23,7 +23,7 @@ import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.everapi.services.stats.StatsService;
 import fr.evercraft.everstats.service.EStatsService;
-import fr.evercraft.everstats.service.ManagerEvent;
+import fr.evercraft.everstats.service.event.ManagerEvent;
 
 @Plugin(id = "fr.evercraft.everstats", 
 		name = "EverStats", 
@@ -80,6 +80,7 @@ public class EverStats extends EPlugin {
 		}
 		
 		this.service.reload();
+		this.event.reload();
 	}
 	
 	@Override
