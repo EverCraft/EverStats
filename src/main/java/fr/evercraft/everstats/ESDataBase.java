@@ -24,8 +24,7 @@ import java.sql.Timestamp;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-import org.spongepowered.api.entity.living.player.Player;
-
+import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EDataBase;
 
@@ -33,15 +32,17 @@ public class ESDataBase extends EDataBase<EverStats> {
 	private String table_death;
 	private String banned;
 
-	public ESDataBase(EverStats plugin) {
+	public ESDataBase(EverStats plugin) throws PluginDisableException {
 		super(plugin, true);
-		
-		this.banned = "( '" + String.join("' , '", this.plugin.getConfigs().getListString("top.banned")) + "' )";
+		this.loadBanned();
 	}
 	
-	public void reload() {
+	public void reload() throws PluginDisableException {
 		super.reload();
-		
+		this.loadBanned();
+	}
+	
+	public void loadBanned() {
 		this.banned = "( '" + String.join("' , '", this.plugin.getConfigs().getListString("top.banned")) + "' )";
 	}
 
@@ -56,35 +57,6 @@ public class ESDataBase extends EDataBase<EverStats> {
 				"PRIMARY KEY (`id`));";
 		initTable(this.getTableDeath(), death);
 		return true;
-	}
-	
-	public void delete(Player player){
-		String query = "DELETE FROM " + this.getTableDeath() + " "
-				+ "WHERE `killer` = ? "
-				+ "OR `victim` = ?;";
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, player.getUniqueId().toString());
-			preparedStatement.setString(2, player.getUniqueId().toString());
-			preparedStatement.execute();
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during deleting : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
 	}
 
 	public String getTableDeath() {

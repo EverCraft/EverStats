@@ -199,6 +199,34 @@ public class ESubject implements StatsSubject {
 		}
 	}
 	
+	public void delete(){
+		String query = "DELETE FROM " + this.plugin.getDataBases().getTableDeath() + " "
+					+  "WHERE `killer` = ? "
+					+  "OR `victim` = ?;";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		try {
+			connection = this.plugin.getDataBases().getConnection();
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, this.identifier.toString());
+			preparedStatement.setString(2, this.identifier.toString());
+			preparedStatement.execute();
+		} catch (SQLException e) {
+			this.plugin.getLogger().warn("Error during deleting (uuid='" + this.identifier + "'): " + e.getMessage());
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {}	
+		}
+	}
+	
 	public boolean saveDeath(String killer, String cause, Long time) {
 		boolean resultat = false;
 		Connection connection = null;
