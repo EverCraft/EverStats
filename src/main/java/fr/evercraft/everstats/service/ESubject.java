@@ -350,7 +350,10 @@ public class ESubject implements StatsSubject {
 	private Long getTimeMonthly() {
 		GregorianCalendar calendar = new GregorianCalendar();
 		calendar.setTimeInMillis(System.currentTimeMillis());
-		calendar.add(GregorianCalendar.MONTH, -1);
+		calendar.set(GregorianCalendar.MONTH, 1);
+		calendar.set(GregorianCalendar.HOUR, 0);
+		calendar.set(GregorianCalendar.MINUTE, 0);
+		calendar.set(GregorianCalendar.SECOND, 0);
 		return calendar.getTimeInMillis();
 	}
 	
