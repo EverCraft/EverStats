@@ -183,12 +183,12 @@ public class EStatsService implements StatsService {
 	 */
 	
 	@Override
-	public LinkedHashMap<UUID, Integer> getTopDeaths(int count) {
+	public LinkedHashMap<UUID, Double> getTopDeaths(int count) {
 		return this.getTopKills(count, (long) 0);
 	}
 	
 	@Override
-	public LinkedHashMap<UUID, Integer> getTopDeaths(int count, Long time) {
+	public LinkedHashMap<UUID, Double> getTopDeaths(int count, Long time) {
 		Preconditions.checkNotNull(count, "count");
 		Preconditions.checkNotNull(time, "time");
 		
@@ -196,12 +196,12 @@ public class EStatsService implements StatsService {
 	}
 	
 	@Override
-	public LinkedHashMap<UUID, Integer> getTopKills(int count) {
+	public LinkedHashMap<UUID, Double> getTopKills(int count) {
 		return this.getTopKills(count, (long) 0);
 	}
 	
 	@Override
-	public LinkedHashMap<UUID, Integer> getTopKills(int count, Long time) {
+	public LinkedHashMap<UUID, Double> getTopKills(int count, Long time) {
 		Preconditions.checkNotNull(count, "count");
 		Preconditions.checkNotNull(time, "time");
 		

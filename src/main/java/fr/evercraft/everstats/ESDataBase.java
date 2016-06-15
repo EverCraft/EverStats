@@ -21,16 +21,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.spongepowered.api.entity.living.player.Player;
 
-import fr.evercraft.elements.ESInformation;
 import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EDataBase;
 
@@ -40,6 +35,12 @@ public class ESDataBase extends EDataBase<EverStats> {
 
 	public ESDataBase(EverStats plugin) {
 		super(plugin, true);
+		
+		this.banned = "( '" + String.join("' , '", this.plugin.getConfigs().getListString("top.banned")) + "' )";
+	}
+	
+	public void reload() {
+		super.reload();
 		
 		this.banned = "( '" + String.join("' , '", this.plugin.getConfigs().getListString("top.banned")) + "' )";
 	}
@@ -55,364 +56,6 @@ public class ESDataBase extends EDataBase<EverStats> {
 				"PRIMARY KEY (`id`));";
 		initTable(this.getTableDeath(), death);
 		return true;
-	}
-	
-	public boolean check(UUID victim, UUID killer, long time){
-		boolean check = false;
-		ResultSet resultat;
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		String query = "SELECT COUNT(*) "
-			+ "FROM `" + this.getTableDeath() + "` "
-			+ "WHERE `victim` = ?  AND `killer` = ? AND `time` >= ?;";
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, victim.toString());
-			preparedStatement.setString(2, killer.toString());
-			preparedStatement.setTimestamp(3, new Timestamp(time));
-			resultat = preparedStatement.executeQuery();
-			if (resultat.next()){
-				int value = resultat.getInt(1);
-				if (value == 0){
-					check = true;
-				}
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during checking : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return check;
-	}
-	
-	public ESInformation info(Player player){
-		ESInformation data = null;
-		PreparedStatement preparedStatement = null;
-		Connection connection = null;
-		String query = "SELECT v.victim, k.killer "
-				+ "FROM ("
-					+ "SELECT count(*) as killer "
-					+ "FROM " + this.getTableDeath() +" " 
-					+ "WHERE killer = ? "
-					+ "AND `victim` NOT IN " + this.banned + " "
-				+ ") k, ("
-					+ "SELECT count(*) as victim "
-					+ "FROM everstats "
-					+ "WHERE victim = ? "
-					+ "AND `killer` NOT IN " + this.banned + " "
-				+ ") v ;";
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			preparedStatement.setString(1, player.getUniqueId().toString());
-			preparedStatement.setString(2, player.getUniqueId().toString());
-			ResultSet result = preparedStatement.executeQuery();
-			if (result.next()){
-				data = new ESInformation(result.getInt("killer"), result.getInt("victim"));
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during info : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return data;
-	}
-	
-	public ArrayList<Map.Entry<UUID, Double>> topKill(Integer count){
-		Map<UUID, Double> data = new HashMap<UUID, Double>();
-		PreparedStatement preparedStatement = null;
-		String query = "SELECT `killer`, count(*) as `kill` "
-				+ "FROM " + this.getTableDeath() + " "
-				+ "WHERE `killer` != `victim`"
-				+ "AND `victim` NOT IN " + this.banned + " "
-				+ "AND `killer` NOT IN " + this.banned + " "
-				+ "GROUP BY `killer` "
-				+ "HAVING `killer` IS NOT NULL "
-				+ "ORDER BY `kill` DESC "
-				+ "LIMIT " + count + " ;";
-		Connection connection = null;
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			ResultSet result = preparedStatement.executeQuery();
-			while(result.next()){
-				data.put(UUID.fromString(result.getString("killer")), result.getDouble("kill"));
-			}
-			connection.close();	
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during topKill : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return new ArrayList<Map.Entry<UUID, Double>>(data.entrySet());
-	}
-	  
-	public ArrayList<Map.Entry<UUID, Double>> topDeath(Integer count){
-		Map<UUID, Double> data = new HashMap<UUID, Double>();
-		String query = "SELECT `victim`, count(*) as `death` "
-				+ "FROM " + this.getTableDeath() + " "
-				+ "WHERE `killer` NOT IN " + this.banned + " "
-				+ "AND `victim` NOT IN " + this.banned + " "
-				+ "GROUP BY `victim` "
-				+ "ORDER BY `death` DESC "
-				+ "LIMIT " + count + " ;";
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try{
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			ResultSet result = preparedStatement.executeQuery();
-			while(result.next()){
-				data.put(UUID.fromString(result.getString("victim")), result.getDouble("death"));
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during topDeath : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return new ArrayList<Map.Entry<UUID, Double>>(data.entrySet());
-	}
-	
-	public List<Map.Entry<UUID, Double>> topRatio(Integer count) {
-		Map<UUID, Double> data = new HashMap<UUID, Double>();
-		String query = "(SELECT v.victim as `uuid`, k.kill/v.death as `ratio` "
-				+ "FROM "
-					+ "(SELECT `victim`, count(*) as `death` "
-					+ "FROM " + this.getTableDeath() + " "
-					+ "WHERE `killer` NOT IN " + this.banned + " "
-					+ "AND `victim` NOT IN " + this.banned + " "
-					+ "GROUP BY `victim` "
-					+ "HAVING count(*) > 0) v, "
-					+ "(SELECT `killer`, count(*) as `kill` "
-					+ "FROM " + this.getTableDeath() + " "
-					+ "WHERE `victim` NOT IN " + this.banned + " "
-					+ "AND `killer` NOT IN " + this.banned + " "
-					+ "GROUP BY `killer` "
-					+ "HAVING `killer` IS NOT NULL) k "
-				+ "WHERE v.victim = k.killer) "
-		  	+ "UNION "
-		  		+ "(SELECT `killer`, count(*) as `ratio` "
-		  		+ "FROM " + this.getTableDeath() + " "
-		  		+ "WHERE `killer` NOT IN "
-		  			+ "(SELECT `victim` as `killer` "
-		  			+ "FROM " + this.getTableDeath() + " "
-		  			+ "WHERE `victim` NOT IN " + this.banned + " "
-					+ "AND `killer` NOT IN " + this.banned + " "
-		  			+ "GROUP BY `victim` ) "
-				+ "AND `victim` NOT IN " + this.banned + " "
-				+ "AND `killer` NOT IN " + this.banned + " "
-		  		+ "GROUP BY `killer`) "
-		  	+ "ORDER BY `ratio` DESC "
-		  	+ "LIMIT " + count + " ;";
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			ResultSet result = preparedStatement.executeQuery();
-			while(result.next()){
-				data.put(UUID.fromString(result.getString("uuid")), Math.ceil(result.getDouble("ratio")));
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during topRatio : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return new ArrayList<Map.Entry<UUID, Double>>(data.entrySet());
-	}	
-	
-	public ArrayList<Map.Entry<UUID, Double>> topKillMonthly(Integer count) {
-		Map<UUID, Double> data = new HashMap<UUID, Double>();
-		String query = "SELECT `killer`, count(*) as `kill` "
-				+ "FROM " + this.getTableDeath() + " "
-				+ "WHERE MONTH(time) = MONTH(NOW()) "
-				+ "AND YEAR(time) = YEAR(NOW()) "
-				+ "AND `killer` != `victim`"
-				+ "AND `victim` NOT IN " + this.banned + " "
-				+ "AND `killer` NOT IN " + this.banned + " "
-				+ "GROUP BY `killer` "
-				+ "HAVING `killer` IS NOT NULL "
-				+ "ORDER BY `kill` DESC "
-				+ "LIMIT " + count + " ;";
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			ResultSet result = preparedStatement.executeQuery();
-			while(result.next()){
-				data.put(UUID.fromString(result.getString("killer")), result.getDouble("kill"));
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during topKillMonthly : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return new ArrayList<Map.Entry<UUID, Double>>(data.entrySet());
-	}
-	  
-	public ArrayList<Map.Entry<UUID, Double>> topDeathMonthly(Integer count) {
-		Map<UUID, Double> data = new HashMap<UUID, Double>();
-		String query = "SELECT `victim`, count(*) as `death` "
-				+ "FROM " + this.getTableDeath() + " "
-				+ "WHERE MONTH(time) = MONTH(NOW()) "
-				+ "AND YEAR(time) = YEAR(NOW()) "
-				+ "AND `killer` NOT IN " + this.banned + " "
-				+ "AND `victim` NOT IN " + this.banned + " "
-				+ "GROUP BY `victim` "
-				+ "ORDER BY `death` DESC "
-				+ "LIMIT " + count + " ;";
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			ResultSet result = preparedStatement.executeQuery();
-			while(result.next()){
-				data.put(UUID.fromString(result.getString("victim")), result.getDouble("death"));
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during topDeathMonthly : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return new ArrayList<Map.Entry<UUID, Double>>(data.entrySet());
-	}
-	
-	public List<Map.Entry<UUID, Double>> topRatioMonthly(Integer count) {
-		Map<UUID, Double> data = new HashMap<UUID, Double>();
-		String query = "(SELECT v.victim as `uuid`, k.kill/v.death as `ratio` "
-						+ "FROM "
-							+ "(SELECT `victim`, count(*) as `death` "
-							+ "FROM " + this.getTableDeath() + " "
-							+ "WHERE MONTH(time) = MONTH(NOW()) "
-							+ "AND YEAR(time) = YEAR(NOW()) "
-							+ "AND `killer` NOT IN " + this.banned + " "
-							+ "AND `victim` NOT IN " + this.banned + " "
-							+ "GROUP BY `victim` "
-							+ "HAVING count(*) > 0) v, "
-							+ "(SELECT `killer`, count(*) as `kill` "
-							+ "FROM " + this.getTableDeath() + " "
-							+ "WHERE MONTH(time) = MONTH(NOW()) "
-							+ "AND YEAR(time) = YEAR(NOW()) "
-							+ "AND `victim` NOT IN " + this.banned + " "
-							+ "AND `killer` NOT IN " + this.banned + " "
-							+ "GROUP BY `killer` "
-							+ "HAVING `killer` IS NOT NULL) k "
-						+ "WHERE v.victim = k.killer) "
-				  	+ "UNION "
-				  		+ "(SELECT `killer`, count(*) as `ratio` "
-				  		+ "FROM " + this.getTableDeath() + " "
-				  		+ "WHERE `killer` NOT IN "
-				  			+ "(SELECT `victim` as `killer` "
-				  			+ "FROM " + this.getTableDeath() + " "
-				  			+ "WHERE MONTH(time) = MONTH(NOW()) "
-				  			+ "AND YEAR(time) = YEAR(NOW()) "
-				  			+ "AND `victim` NOT IN " + this.banned + " "
-							+ "AND `killer` NOT IN " + this.banned + " "
-				  			+ "GROUP BY `victim` ) "
-				  		+ "AND MONTH(time) = MONTH(NOW()) "
-						+ "AND YEAR(time) = YEAR(NOW()) "
-						+ "AND `victim` NOT IN " + this.banned + " "
-						+ "AND `killer` NOT IN " + this.banned + " "
-				  		+ "GROUP BY `killer`) "
-				  	+ "ORDER BY `ratio` DESC "
-				  	+ "LIMIT " + count + " ;";
-		Connection connection = null;
-		PreparedStatement preparedStatement = null;
-		try {
-			connection = getConnection();
-			preparedStatement = connection.prepareStatement(query);
-			ResultSet result = preparedStatement.executeQuery();
-			while(result.next()){
-				data.put(UUID.fromString(result.getString("uuid")), Math.ceil(result.getDouble("ratio")));
-			}
-			connection.close();
-		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during topRatioMonthly : (identifier:'" + query + "'): " + e.getMessage());
-		} catch (ServerDisableException e) {
-			e.execute();
-		} finally {
-			try {
-				if (preparedStatement != null) {
-					preparedStatement.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {}	
-		}
-		return new ArrayList<Map.Entry<UUID, Double>>(data.entrySet());
 	}
 	
 	public void delete(Player player){
@@ -452,8 +95,8 @@ public class ESDataBase extends EDataBase<EverStats> {
 		return this.banned;
 	}
 	
-	public LinkedHashMap<UUID, Integer> getTopDeaths(int count, Long time) {
-		LinkedHashMap<UUID, Integer> players = new LinkedHashMap<UUID, Integer>();
+	public LinkedHashMap<UUID, Double> getTopDeaths(int count, Long time) {
+		LinkedHashMap<UUID, Double> players = new LinkedHashMap<UUID, Double>();
 		String query =    "SELECT `victim`, count(*) as `death` "
 						+ "FROM " + this.getTableDeath() + " "
 						+ "WHERE `time` >= ? "
@@ -470,7 +113,11 @@ public class ESDataBase extends EDataBase<EverStats> {
 			preparedStatement.setTimestamp(1, new Timestamp(time));
 			ResultSet result = preparedStatement.executeQuery();
 			while(result.next()){
-				players.put(UUID.fromString(result.getString("victim")), result.getInt("death"));
+				try {
+					players.put(UUID.fromString(result.getString("victim")), result.getDouble("death"));
+				} catch(IllegalArgumentException e) {
+					this.plugin.getLogger().warn("getTopDeaths : " + result.getString("victim"));
+				}
 			}
 			connection.close();
 		} catch (SQLException e) {
@@ -490,16 +137,16 @@ public class ESDataBase extends EDataBase<EverStats> {
 		return players;
 	}
 
-	public LinkedHashMap<UUID, Integer> getTopKills(int count, Long time) {
-		LinkedHashMap<UUID, Integer> players = new LinkedHashMap<UUID, Integer>();
+	public LinkedHashMap<UUID, Double> getTopKills(int count, Long time) {
+		LinkedHashMap<UUID, Double> players = new LinkedHashMap<UUID, Double>();
 		String query = 	  "SELECT `killer`, count(*) as `kill` "
 						+ "FROM " + this.getTableDeath() + " "
 						+ "WHERE `time` >= ? "
-						+ "AND `killer` != `victim`"
-						+ "AND `victim` NOT IN " + this.getBanned() + " "
-						+ "AND `killer` NOT IN " + this.getBanned() + " "
+							+ "AND `victim` NOT IN " + this.getBanned() + " "
+							+ "AND `killer` NOT IN " + this.getBanned() + " "
 						+ "GROUP BY `killer` "
 						+ "HAVING `killer` IS NOT NULL "
+							+ "AND LENGTH(`killer`) = 36 "
 						+ "ORDER BY `kill` DESC "
 						+ "LIMIT " + count + " ;";
 		Connection connection = null;
@@ -510,7 +157,11 @@ public class ESDataBase extends EDataBase<EverStats> {
 			preparedStatement.setTimestamp(1, new Timestamp(time));
 			ResultSet result = preparedStatement.executeQuery();
 			while(result.next()){
-				players.put(UUID.fromString(result.getString("killer")), result.getInt("kill"));
+				try {
+					players.put(UUID.fromString(result.getString("killer")), result.getDouble("kill"));
+				} catch(IllegalArgumentException e) {
+					this.plugin.getLogger().warn("getTopKills : " + result.getString("killer"));
+				}
 			}
 		} catch (SQLException e) {
 			this.plugin.getLogger().warn("Error during TopKill (time='" + time + "';count='" + count + "') : " + e.getMessage());
@@ -533,35 +184,37 @@ public class ESDataBase extends EDataBase<EverStats> {
 		LinkedHashMap<UUID, Double> players = new LinkedHashMap<UUID, Double>();
 		String query =   "(SELECT v.victim as `uuid`, k.kill/v.death as `ratio` "
 						+ "FROM "
-							+ "(SELECT `victim`, count(*) as `death` "
+						   + "(SELECT `victim`, count(*) as `death` "
 							+ "FROM " + this.getTableDeath() + " "
-							+ "WHERE `time` >= ? "
-							+ "AND `killer` NOT IN " + this.getBanned() + " "
-							+ "AND `victim` NOT IN " + this.getBanned() + " "
+								+ "WHERE `time` >= ? "
+								+ "AND `killer` NOT IN " + this.getBanned() + " "
+								+ "AND `victim` NOT IN " + this.getBanned() + " "
 							+ "GROUP BY `victim` "
 							+ "HAVING count(*) > 0) v, "
 							+ "(SELECT `killer`, count(*) as `kill` "
 							+ "FROM " + this.getTableDeath() + " "
-							+ "WHERE `time` >= ? "
-							+ "AND `victim` NOT IN " + this.getBanned() + " "
-							+ "AND `killer` NOT IN " + this.getBanned() + " "
+								+ "WHERE `time` >= ? "
+								+ "AND `victim` NOT IN " + this.getBanned() + " "
+								+ "AND `killer` NOT IN " + this.getBanned() + " "
 							+ "GROUP BY `killer` "
 							+ "HAVING `killer` IS NOT NULL) k "
-						+ "WHERE v.victim = k.killer) "
+						+ "WHERE v.victim = k.killer"
+						+ "AND LENGTH(k.killer) = 36) "
 				  	+ "UNION "
 				  		+ "(SELECT `killer`, count(*) as `ratio` "
 				  		+ "FROM " + this.getTableDeath() + " "
 				  		+ "WHERE `killer` NOT IN "
 				  			+ "(SELECT `victim` as `killer` "
 				  			+ "FROM " + this.getTableDeath() + " "
-				  			+ "WHERE `time` >= ? "
-				  			+ "AND `victim` NOT IN " + this.banned + " "
-							+ "AND `killer` NOT IN " + this.banned + " "
+				  				+ "WHERE `time` >= ? "
+				  				+ "AND `victim` NOT IN " + this.banned + " "
+				  				+ "AND `killer` NOT IN " + this.banned + " "
 				  			+ "GROUP BY `victim` ) "
 				  			+ "WHERE `time` >= ? "
 						+ "AND `victim` NOT IN " + this.banned + " "
 						+ "AND `killer` NOT IN " + this.banned + " "
-				  		+ "GROUP BY `killer`) "
+				  		+ "GROUP BY `killer` "
+				  		+ "HAVING LENGTH(`killer`) = 36) "
 				  	+ "ORDER BY `ratio` DESC "
 				  	+ "LIMIT " + count + " ;";
 		Connection connection = null;
@@ -575,8 +228,12 @@ public class ESDataBase extends EDataBase<EverStats> {
 			preparedStatement.setTimestamp(3, timestamp);
 			preparedStatement.setTimestamp(4, timestamp);
 			ResultSet result = preparedStatement.executeQuery();
-			while(result.next()){
-				players.put(UUID.fromString(result.getString("uuid")), Math.ceil(result.getDouble("ratio")));
+			while(result.next()) {
+				try {
+					players.put(UUID.fromString(result.getString("uuid")), Math.ceil(result.getDouble("ratio")));
+				} catch(IllegalArgumentException e) {
+					this.plugin.getLogger().warn("getTopRatio : " + result.getString("ratio"));
+				}
 			}
 		} catch (SQLException e) {
 			this.plugin.getLogger().warn("Error during TopRatio (time='" + time + "';count='" + count + "') : " + e.getMessage());
