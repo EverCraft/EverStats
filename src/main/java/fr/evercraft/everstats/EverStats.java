@@ -21,7 +21,7 @@ import org.spongepowered.api.plugin.Plugin;
 
 import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
-import fr.evercraft.everapi.services.stats.StatsService;
+import fr.evercraft.everapi.services.StatsService;
 import fr.evercraft.everstats.service.EStatsService;
 import fr.evercraft.everstats.service.event.ManagerEvent;
 
