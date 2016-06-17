@@ -52,7 +52,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import com.google.common.base.Preconditions;
 
 import fr.evercraft.everapi.exception.ServerDisableException;
-import fr.evercraft.everapi.services.stats.StatsSubject;
+import fr.evercraft.everapi.services.StatsSubject;
 import fr.evercraft.everstats.EverStats;
 
 public class ESubject implements StatsSubject {
