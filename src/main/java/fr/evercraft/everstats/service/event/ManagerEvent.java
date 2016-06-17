@@ -38,7 +38,7 @@ public class ManagerEvent {
 	
 	public void reload() {
 		this.plugin.getLogger().debug("Event StatsReloadEvent");
-		this.plugin.getGame().getEventManager().post(new EStatsReloadEvent(Cause.source(this.plugin).build()));
+		this.plugin.getGame().getEventManager().post(new EReloadStatsSystemEvent(Cause.source(this.plugin).build()));
 	}
 	
 	public void post(UUID uuid, Entity killer, DamageType cause, Long time) {

@@ -18,18 +18,11 @@ package fr.evercraft.everstats.service.event;
 
 import org.spongepowered.api.event.cause.Cause;
 
-import fr.evercraft.everapi.event.StatsReloadEvent;
+import fr.evercraft.everapi.event.StatsSystemEvent;
 
-public class EStatsReloadEvent implements StatsReloadEvent {
-
-    private final Cause cause;
-
-    public EStatsReloadEvent(Cause cause) {
-    	this.cause = cause;
+public class EReloadStatsSystemEvent extends EStatsSystemEvent implements StatsSystemEvent.Reload {
+	
+    public EReloadStatsSystemEvent(Cause cause) {
+    	super(cause, Action.RELOADED);
     }
-
-	@Override
-	public Cause getCause() {
-		return this.cause;
-	}
 }
