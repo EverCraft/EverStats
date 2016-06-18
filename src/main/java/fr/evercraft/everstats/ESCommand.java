@@ -27,8 +27,8 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
+import fr.evercraft.everapi.command.ECommand;
 import fr.evercraft.everapi.plugin.EChat;
-import fr.evercraft.everapi.plugin.ECommand;
 import fr.evercraft.everstats.ESMessage.ESMessages;
 
 public class ESCommand extends ECommand<EverStats> {
