@@ -53,8 +53,8 @@ public class ESListener {
 							Player killer = (Player) entityDamage.getSource();
 							if (!victim.equals(killer)) {
 								if(!victim_player.get().addDeath(killer, reason, System.currentTimeMillis())) {
-									killer.sendMessage(EChat.of(ESMessages.PREFIX
-											+ ESMessages.PLAYER_SPAWNKILL.get().replaceAll("<time>", this.plugin.getService().getCooldown().toString())));
+									killer.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.PLAYER_SPAWNKILL.get()
+											.replaceAll("<time>", this.plugin.getService().getCooldown().toString())));
 								}
 							}
 						} else {
