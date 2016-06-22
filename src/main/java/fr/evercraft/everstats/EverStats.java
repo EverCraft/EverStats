@@ -22,6 +22,7 @@ import org.spongepowered.api.plugin.Plugin;
 import fr.evercraft.everapi.exception.PluginDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.everapi.services.StatsService;
+import fr.evercraft.everstats.command.sub.ESReload;
 import fr.evercraft.everstats.service.EStatsService;
 import fr.evercraft.everstats.service.event.ManagerEvent;
 
@@ -63,7 +64,8 @@ public class EverStats extends EPlugin {
 	@Override
 	protected void onCompleteEnable() throws PluginDisableException {		
 		// Commands
-		new ESCommand(this);
+		ESCommand command = new ESCommand(this);
+		command.add(new ESReload(this, command));
 		
 		// Listerners
 		this.getGame().getEventManager().registerListeners(this, new ESListener(this));

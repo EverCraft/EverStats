@@ -23,6 +23,8 @@ import com.google.common.base.Preconditions;
 import fr.evercraft.everapi.plugin.EnumPermission;
 
 public enum ESPermissions implements EnumPermission {
+	
+	EVERSTATS("command"),
 	HELP("help"),
 	RELOAD("reload");
 	

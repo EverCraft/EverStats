@@ -16,103 +16,30 @@
  */
 package fr.evercraft.everstats;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.text.LiteralText.Builder;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
 
-import fr.evercraft.everapi.EAMessage.EAMessages;
-import fr.evercraft.everapi.plugin.EChat;
-import fr.evercraft.everapi.plugin.command.ECommand;
+import fr.evercraft.everapi.plugin.command.EParentCommand;
 import fr.evercraft.everstats.ESMessage.ESMessages;
 
-public class ESCommand extends ECommand<EverStats> {
+public class ESCommand extends EParentCommand<EverStats> {
 	
 	public ESCommand(final EverStats plugin) {
-        super(plugin, "everstats", "stats");
+		super(plugin, "everstats", "stats");
     }
 	
+	@Override
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(ESPermissions.HELP.get());
+		return source.hasPermission(ESPermissions.EVERSTATS.get());
 	}
 
+	@Override
 	public Text description(final CommandSource source) {
 		return ESMessages.DESCRIPTION.getText();
 	}
-	
-	public List<String> tabCompleter(final CommandSource source, final List<String> args) throws CommandException {
-		List<String> suggests = new ArrayList<String>();
-		if(args.size() == 1){
-			if(source.hasPermission(ESPermissions.HELP.get())){
-				suggests.add("help");
-			}
-		}
-		return suggests;
-	}
 
-	public Text help(final CommandSource source) {
-		boolean help = source.hasPermission(ESPermissions.HELP.get());
-		boolean reload = source.hasPermission(ESPermissions.RELOAD.get());
-
-		Builder build;
-		if(help || reload){
-			build = Text.builder("/eco <");
-			if(help){
-				build = build.append(Text.builder("help").onClick(TextActions.suggestCommand("/eco help")).build());
-				if(reload){
-					build = build.append(Text.builder("|").build());
-				}
-			}
-			if(reload){
-				build = build.append(Text.builder("reload").onClick(TextActions.suggestCommand("/eco reload")).build());
-			}
-		} else {
-			build = Text.builder("/eco").onClick(TextActions.suggestCommand("/eco"));
-		}
-		return build.color(TextColors.RED).build();
-	}
-	
-	public boolean execute(final CommandSource source, final List<String> args) {
-		// Résultat de la commande :
-		boolean resultat = false;
-		
-		// HELP
-		if(args.size() == 0 || (args.size() == 1 && args.get(0).equals("help"))) {
-			// Si il a la permission
-			if(source.hasPermission(ESPermissions.HELP.get())){
-				resultat = commandHelp(source);
-			// Il n'a pas la permission
-			} else {
-				source.sendMessage(EAMessages.NO_PERMISSION.getText());
-			}
-		// RELOAD
-		} else if(args.size() == 1 && args.get(0).equals("reload")) {
-			// Si il a la permission
-			if(source.hasPermission(ESPermissions.RELOAD.get())){
-				resultat = commandReload(source);
-			// Il n'a pas la permission
-			} else {
-				source.sendMessage(EAMessages.NO_PERMISSION.getText());
-			}
-		// Nombre d'argument incorrect
-		} else {
-			source.sendMessage(getHelp(source).get());
-		}
-		return resultat;
-	}
-
-	private boolean commandReload(final CommandSource player) {
-		this.plugin.reload();
-		player.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.RELOAD_COMMAND.get()));
-		return true;
-	}
-	
-	private boolean commandHelp(final CommandSource source) {
-		return true;
+	@Override
+	public boolean testPermissionHelp(final CommandSource source) {
+		return source.hasPermission(ESPermissions.HELP.get());
 	}
 }
