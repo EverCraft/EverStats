@@ -204,7 +204,7 @@ public class ESubject implements StatsSubject {
 			
 			ResultSet result = preparedStatement.executeQuery();
 			while (result.next()) {
-				this.kill = result.getInt("killstreaks");
+				this.killstreaks = result.getInt("killstreaks");
 			}
 		} catch (SQLException e) {
 			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "';type='killstreaks') : " + e.getMessage());
@@ -381,7 +381,8 @@ public class ESubject implements StatsSubject {
 		return this.death;
 	}
 	
-	public int getKillstreaks() {
+	@Override
+	public int getKillStreaks() {
 		return this.killstreaks;
 	}
 	
