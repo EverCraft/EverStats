@@ -84,7 +84,7 @@ public class ESubject implements StatsSubject {
 			this.loadKillDeath(connection);
 			this.loadKillMonthly(connection);
 			this.loadDeathMonthly(connection);
-			this.loadKillstreaks(connection);
+			this.loadKillStreaks(connection);
 			
 		} catch (ServerDisableException e) {
 			e.execute();
@@ -187,7 +187,7 @@ public class ESubject implements StatsSubject {
 		}
 	}
 	
-	public void loadKillstreaks(Connection connection) {
+	public void loadKillStreaks(Connection connection) {
 		PreparedStatement preparedStatement = null;
 		String query = 	 "SELECT COUNT(*) as killstreaks "
 						+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
@@ -195,8 +195,8 @@ public class ESubject implements StatsSubject {
 						+ "AND `time` >= ("
 							+ "SELECT COALESCE(MAX(`time`),0) " 
 							+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
-							+ "WHERE `victim` = ?"
-						+ ")";
+							+ "WHERE `victim` = ? "
+						+ ") ;";
 		try {
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.identifier.toString());
