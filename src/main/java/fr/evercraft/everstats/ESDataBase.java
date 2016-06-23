@@ -31,6 +31,7 @@ import fr.evercraft.everapi.plugin.EDataBase;
 public class ESDataBase extends EDataBase<EverStats> {
 	private String table_death;
 	private String banned;
+	private String table_killstreaks;
 
 	public ESDataBase(EverStats plugin) throws PluginDisableException {
 		super(plugin, true);
@@ -48,6 +49,7 @@ public class ESDataBase extends EDataBase<EverStats> {
 
 	public boolean init() throws ServerDisableException {
 		this.table_death = "death";
+		this.table_killstreaks = "killstreaks";
 		String death = "CREATE TABLE IF NOT EXISTS <table> (" + 
 				"`id` int(11) NOT NULL AUTO_INCREMENT," + 
 				"`victim` varchar(36) NOT NULL," + 
@@ -55,12 +57,22 @@ public class ESDataBase extends EDataBase<EverStats> {
 				"`reason` varchar(36)," + 
 				"`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP," + 
 				"PRIMARY KEY (`id`));";
+		
+		String killstreaks = "CREATE TABLE IF NOT EXISTS <table> (" + 
+				"`uuid` int(11) NOT NULL," + 
+				"`killstreaks` int(11) NOT NULL," + 
+				"PRIMARY KEY (`uuid`));";
 		initTable(this.getTableDeath(), death);
+		initTable(this.getTableKillstreaks(), killstreaks);
 		return true;
 	}
 
 	public String getTableDeath() {
 		return this.getPrefix() + this.table_death;
+	}
+	
+	public String getTableKillstreaks() {
+		return this.getPrefix() + this.table_killstreaks;
 	}
 
 	public String getBanned() {
@@ -221,6 +233,11 @@ public class ESDataBase extends EDataBase<EverStats> {
 				}
 			} catch (SQLException e) {}	
 		}
+		return players;
+	}
+	
+	public LinkedHashMap<UUID, Double> getTopKillstreaks(int count) {
+		LinkedHashMap<UUID, Double> players = new LinkedHashMap<UUID, Double>();
 		return players;
 	}
 }
