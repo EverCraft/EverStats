@@ -189,11 +189,11 @@ public class ESubject implements StatsSubject {
 	
 	public void loadKillstreaks(Connection connection) {
 		PreparedStatement preparedStatement = null;
-		String query = 	 "SELECT COUNT(*) as killstreaks"
+		String query = 	 "SELECT COUNT(*) as killstreaks "
 						+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
 						+ "WHERE `killer` = ? "
 						+ "AND `time` >= ("
-							+ "SELECT COALESCE(MAX(`time`),0)" 
+							+ "SELECT COALESCE(MAX(`time`),0) " 
 							+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
 							+ "WHERE `victim` = ?"
 						+ ")";
