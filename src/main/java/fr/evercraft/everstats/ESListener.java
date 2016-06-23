@@ -24,7 +24,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.server.player.EPlayer;
@@ -36,30 +35,6 @@ public class ESListener {
 	public ESListener(EverStats plugin) {
 		this.plugin = plugin;
 	}
-	
-	/**
-	 * Ajoute le joueur dans le cache
-	 */
-	@Listener
-    public void onClientConnectionEvent(final ClientConnectionEvent.Auth event) {
-		this.plugin.getService().get(event.getProfile().getUniqueId());
-    }
-	
-	/**
-	 * Ajoute le joueur à la liste
-	 */
-	@Listener
-    public void onClientConnectionEvent(final ClientConnectionEvent.Join event) {
-		this.plugin.getService().registerPlayer(event.getTargetEntity().getUniqueId());
-    }
-    
-	/**
-	 * Supprime le joueur de la liste
-	 */
-    @Listener
-    public void onClientConnectionEvent(final ClientConnectionEvent.Disconnect event) {
-        this.plugin.getService().removePlayer(event.getTargetEntity().getUniqueId());
-    }
 	
 	@Listener
 	public void onEntityDeath(DestructEntityEvent event) {
