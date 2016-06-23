@@ -50,6 +50,7 @@ public class ESubject implements StatsSubject {
 	
 	private int kill;
 	private int death;
+	private int killstreaks;
 
 	public ESubject(final EverStats plugin, final UUID uuid) {
 		Preconditions.checkNotNull(plugin, "plugin");
@@ -67,6 +68,7 @@ public class ESubject implements StatsSubject {
 	public void reload() {
 		this.kill = 0;
 		this.death = 0;
+		this.killstreaks = 0;
 		
 		this.kill_month.clear();
 		this.death_month.clear();
@@ -82,6 +84,8 @@ public class ESubject implements StatsSubject {
 			this.loadKillDeath(connection);
 			this.loadKillMonthly(connection);
 			this.loadDeathMonthly(connection);
+			this.loadKillstreaks(connection);
+			
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -183,6 +187,36 @@ public class ESubject implements StatsSubject {
 		}
 	}
 	
+	public void loadKillstreaks(Connection connection) {
+		PreparedStatement preparedStatement = null;
+		String query = 	 "SELECT COUNT(*) as killstreaks"
+						+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
+						+ "WHERE `killer` = ? "
+						+ "AND `time` >= ("
+							+ "SELECT COALESCE(MAX(`time`),0)" 
+							+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
+							+ "WHERE `victim` = ?"
+						+ ")";
+		try {
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, this.identifier.toString());
+			preparedStatement.setString(2, this.identifier.toString());
+			
+			ResultSet result = preparedStatement.executeQuery();
+			while (result.next()) {
+				this.kill = result.getInt("killstreaks");
+			}
+		} catch (SQLException e) {
+			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "';type='killstreaks') : " + e.getMessage());
+		} finally {
+			try {
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+			} catch (SQLException e) {}	
+		}	
+	}
+	
 	public void delete(){
 		String query = "DELETE FROM " + this.plugin.getDataBases().getTableDeath() + " "
 					+  "WHERE `killer` = ? "
@@ -262,6 +296,7 @@ public class ESubject implements StatsSubject {
 				}
 				
 				this.death_month.add(new EDeath(time, killer.getUniqueId()));
+				this.plugin.getEServer().broadcast("AddKill" + ((Player)killer).getName());
 				
 				Optional<ESubject> killer_subject = this.plugin.getService().getSubject(killer.getUniqueId());
 				if(killer_subject.isPresent()) {
@@ -276,6 +311,8 @@ public class ESubject implements StatsSubject {
 		}
 		
 		this.death++;
+		this.killstreaks = 0;
+		this.plugin.getEServer().broadcast("" + this.killstreaks);
 		
 		if (damage != null) {
 			cause = damage.getName();
@@ -325,6 +362,8 @@ public class ESubject implements StatsSubject {
 		
 		this.kill_month.add(time);
 		this.kill++;
+		this.killstreaks++;
+		this.plugin.getEServer().broadcast("" + this.killstreaks);
 		this.plugin.getLogger().warn("Kill :  " + this.kill);
 	}
 	
@@ -340,6 +379,10 @@ public class ESubject implements StatsSubject {
 	@Override
 	public int getDeath() {
 		return this.death;
+	}
+	
+	public int getKillstreaks() {
+		return this.killstreaks;
 	}
 	
 	@Override
