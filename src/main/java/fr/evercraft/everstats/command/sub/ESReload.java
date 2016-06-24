@@ -26,10 +26,11 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 
 import fr.evercraft.everapi.EAMessage.EAMessages;
-import fr.evercraft.everapi.EAPermissions;
 import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.plugin.command.ESubCommand;
 import fr.evercraft.everstats.ESCommand;
+import fr.evercraft.everstats.ESMessage.ESMessages;
+import fr.evercraft.everstats.ESPermissions;
 import fr.evercraft.everstats.EverStats;
 
 public class ESReload extends ESubCommand<EverStats> {
@@ -38,7 +39,7 @@ public class ESReload extends ESubCommand<EverStats> {
     }
 	
 	public boolean testPermission(final CommandSource source) {
-		return source.hasPermission(EAPermissions.RELOAD.get());
+		return source.hasPermission(ESPermissions.RELOAD.get());
 	}
 
 	public Text description(final CommandSource source) {
@@ -66,7 +67,7 @@ public class ESReload extends ESubCommand<EverStats> {
 
 	private boolean commandReload(final CommandSource player) {
 		this.plugin.reload();
-		player.sendMessage(EChat.of(EAMessages.PREFIX.get() + EAMessages.RELOAD_COMMAND.get()));
+		player.sendMessage(EChat.of(ESMessages.PREFIX.get() + EAMessages.RELOAD_COMMAND.get()));
 		return true;
 	}
 }
