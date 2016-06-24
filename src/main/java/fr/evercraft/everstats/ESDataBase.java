@@ -59,7 +59,7 @@ public class ESDataBase extends EDataBase<EverStats> {
 				"PRIMARY KEY (`id`));";
 		
 		String killstreaks = "CREATE TABLE IF NOT EXISTS <table> (" + 
-				"`uuid` int(11) NOT NULL," + 
+				"`uuid` varchar(36) NOT NULL," + 
 				"`killstreaks` int(11) NOT NULL," + 
 				"PRIMARY KEY (`uuid`));";
 		initTable(this.getTableDeath(), death);
@@ -238,6 +238,42 @@ public class ESDataBase extends EDataBase<EverStats> {
 	
 	public LinkedHashMap<UUID, Double> getTopKillstreaks(int count) {
 		LinkedHashMap<UUID, Double> players = new LinkedHashMap<UUID, Double>();
+		String query =    "SELECT `victim`, count(*) as `death` "
+						+ "FROM " + this.getTableDeath() + " "
+						+ "WHERE `time` >= ? "
+						+ "AND `killer` NOT IN " + this.banned + " "
+						+ "AND `victim` NOT IN " + this.banned + " "
+						+ "GROUP BY `victim` "
+						+ "ORDER BY `death` DESC "
+						+ "LIMIT " + count + " ;";
+		Connection connection = null;
+		PreparedStatement preparedStatement = null;
+		try {
+			connection = getConnection();
+			preparedStatement = connection.prepareStatement(query);
+			ResultSet result = preparedStatement.executeQuery();
+			while(result.next()){
+				try {
+					players.put(UUID.fromString(result.getString("victim")), result.getDouble("death"));
+				} catch(IllegalArgumentException e) {
+					this.plugin.getLogger().warn("getTopKillstreaks : " + result.getString("victim"));
+				}
+			}
+			connection.close();
+		} catch (SQLException e) {
+			this.plugin.getLogger().warn("Error during TopKillstreaks (';count='" + count + "') : " + e.getMessage());
+		} catch (ServerDisableException e) {
+			e.execute();
+		} finally {
+			try {
+				if (preparedStatement != null) {
+					preparedStatement.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {}	
+		}
 		return players;
 	}
 }
