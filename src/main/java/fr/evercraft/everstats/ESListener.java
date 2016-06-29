@@ -71,7 +71,6 @@ public class ESListener {
 				Optional<EPlayer> victim_player = this.plugin.getEServer().getEPlayer(victim);
 				if(victim_player.isPresent()) {
 					DamageSource damageSource = optDamageSource.get();
-					this.plugin.getEServer().broadcast("addDeath" + victim_player.get().getDisplayName());
 					if (damageSource instanceof EntityDamageSource){
 						EntityDamageSource entityDamage = (EntityDamageSource) optDamageSource.get();
 						DamageType reason = damageSource.getType();

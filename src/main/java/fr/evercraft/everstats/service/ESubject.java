@@ -230,12 +230,11 @@ public class ESubject implements StatsSubject {
 		try {
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.identifier.toString());
-			
 			ResultSet result = preparedStatement.executeQuery();
 			if(result.next()) {
 				this.best_killstreaks = result.getInt("killstreaks");
 			} else {
-				this.insertPlayer(connection);
+				this.insertKillstreaks(connection);
 			}
 		} catch (SQLException e) {
 			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "';type='killstreaks') : " + e.getMessage());
@@ -248,11 +247,11 @@ public class ESubject implements StatsSubject {
 		}	
 	}
 	
-	private void insertPlayer(Connection connection) {
+	private void insertKillstreaks(Connection connection) {
 		PreparedStatement preparedStatement = null;
+		String query = 	  "INSERT INTO `" + this.plugin.getDataBases().getTableKillstreaks() + "` "
+				+ "VALUES (?, ?);";
 		try {
-			String query = 	  "INSERT INTO `" + this.plugin.getDataBases().getTableKillstreaks() + "` "
-							+ "VALUES (?, ?);";
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.identifier.toString());
 			preparedStatement.setInt(2, this.best_killstreaks);
@@ -269,17 +268,28 @@ public class ESubject implements StatsSubject {
 	    }
 	}
 	
-	private void updatePlayer(Connection connection) {
+	private void addKillstreaks(){
+		if(this.killstreaks > this.best_killstreaks){
+			this.best_killstreaks = this.killstreaks;
+			updateKillstreaks();
+		}
+	}
+	
+	private void updateKillstreaks() {
+		String query = 	  "UPDATE `" + this.plugin.getDataBases().getTableKillstreaks() + "` "
+				+ "SET killstreaks = ? "
+				+ "WHERE uuid = ?;";
 		PreparedStatement preparedStatement = null;
+		Connection connection = null;
 		try {
-			String query = 	  "UPDATE `" + this.plugin.getDataBases().getTableKillstreaks() + "` "
-							+ "SET killstreaks = ?"
-							+ "WHERE uuid = ?);";
+			connection = this.plugin.getDataBases().getConnection();
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setInt(1, this.killstreaks);
 			preparedStatement.setString(2, this.identifier.toString());
 			
 			preparedStatement.execute();
+		} catch (ServerDisableException e) {
+			e.execute();
 		} catch (SQLException e) {
 	    	this.plugin.getLogger().warn("Error during a change of player : " + e.getMessage());
 		} finally {
@@ -319,7 +329,7 @@ public class ESubject implements StatsSubject {
 		}
 	}
 	
-	public boolean saveDeath(String killer, String cause, Long time) {
+	private boolean saveDeath(String killer, String cause, Long time) {
 		boolean resultat = false;
 		Connection connection = null;
 		PreparedStatement preparedStatement = null;
@@ -329,7 +339,6 @@ public class ESubject implements StatsSubject {
 		String name = "";
 		try {
 			connection = this.plugin.getDataBases().getConnection();
-			updatePlayer(connection);
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, killer);
 			preparedStatement.setString(2, this.identifier.toString());
@@ -352,6 +361,10 @@ public class ESubject implements StatsSubject {
 		}
 		return resultat;
 	}
+	
+	/*
+	 * Départ
+	 */
 	
 	@Override
 	public boolean addDeath(final @Nullable Entity killer, final DamageType damage, final Long time) {
@@ -383,9 +396,9 @@ public class ESubject implements StatsSubject {
 		} else {
 			this.death_month.add(new EDeath(time));
 		}
-		
 		this.death++;
 		this.killstreaks = 0;
+
 		
 		if (damage != null) {
 			cause = damage.getName();
@@ -396,7 +409,33 @@ public class ESubject implements StatsSubject {
 		this.plugin.getGame().getScheduler().createTaskBuilder().async().execute(() -> saveDeath(async_killer, async_cause, time)).submit(this.plugin);
 		this.plugin.getManagerEvent().post(this.identifier, killer, damage, time);
 		
+		this.plugin.getEServer().broadcast("---" + this.identifier.toString() + "---");
+		this.plugin.getEServer().broadcast("best_killstreaks : " + this.best_killstreaks);
+		this.plugin.getEServer().broadcast("killstreaks : " + this.killstreaks);
+		this.plugin.getEServer().broadcast("kill : " + this.kill);
+		this.plugin.getEServer().broadcast("death : " + this.death);
+		
 		return true;
+	}
+	
+	/**
+	 * Ajoute un meurtre
+	 * @param time L'heure du meurtre
+	 */
+	private void addKill(final Long time) {
+		Preconditions.checkNotNull(time, "time");
+		
+		this.kill_month.add(time);
+		this.kill++;
+		this.killstreaks++;
+		addKillstreaks();
+		this.plugin.getLogger().warn("Kill :  " + this.kill);
+		
+		this.plugin.getEServer().broadcast("---" + this.identifier.toString() + "---");
+		this.plugin.getEServer().broadcast("best_killstreaks : " + this.best_killstreaks);
+		this.plugin.getEServer().broadcast("killstreaks : " + this.killstreaks);
+		this.plugin.getEServer().broadcast("kill : " + this.kill);
+		this.plugin.getEServer().broadcast("death : " + this.death);
 	}
 	
 	/**
@@ -424,35 +463,6 @@ public class ESubject implements StatsSubject {
 			cpt--;
 		}
 		return !kill;
-	}
-	
-	/**
-	 * Ajoute un meurtre
-	 * @param time L'heure du meurtre
-	 */
-	private void addKill(final Long time) {
-		Preconditions.checkNotNull(time, "time");
-		
-		this.kill_month.add(time);
-		this.kill++;
-		this.killstreaks++;
-		if(this.killstreaks > this.best_killstreaks){
-			this.best_killstreaks = this.killstreaks;
-			Connection connection = null; 
-			try {
-				connection = this.plugin.getDataBases().getConnection();
-				this.insertPlayer(connection);
-			} catch (ServerDisableException e) {
-				e.execute();
-			} finally {
-				try {
-					if (connection != null) {
-						connection.close();
-					}
-				} catch (SQLException e) {}
-			}
-		}
-		this.plugin.getLogger().warn("Kill :  " + this.kill);
 	}
 	
 	/*
