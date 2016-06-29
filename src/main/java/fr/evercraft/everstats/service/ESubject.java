@@ -409,12 +409,6 @@ public class ESubject implements StatsSubject {
 		this.plugin.getGame().getScheduler().createTaskBuilder().async().execute(() -> saveDeath(async_killer, async_cause, time)).submit(this.plugin);
 		this.plugin.getManagerEvent().post(this.identifier, killer, damage, time);
 		
-		this.plugin.getEServer().broadcast("---" + this.identifier.toString() + "---");
-		this.plugin.getEServer().broadcast("best_killstreaks : " + this.best_killstreaks);
-		this.plugin.getEServer().broadcast("killstreaks : " + this.killstreaks);
-		this.plugin.getEServer().broadcast("kill : " + this.kill);
-		this.plugin.getEServer().broadcast("death : " + this.death);
-		
 		return true;
 	}
 	
@@ -431,11 +425,6 @@ public class ESubject implements StatsSubject {
 		addKillstreaks();
 		this.plugin.getLogger().warn("Kill :  " + this.kill);
 		
-		this.plugin.getEServer().broadcast("---" + this.identifier.toString() + "---");
-		this.plugin.getEServer().broadcast("best_killstreaks : " + this.best_killstreaks);
-		this.plugin.getEServer().broadcast("killstreaks : " + this.killstreaks);
-		this.plugin.getEServer().broadcast("kill : " + this.kill);
-		this.plugin.getEServer().broadcast("death : " + this.death);
 	}
 	
 	/**

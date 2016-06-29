@@ -18,11 +18,15 @@ package fr.evercraft.everstats;
 
 import java.util.Optional;
 
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
@@ -62,34 +66,57 @@ public class ESListener {
     }
 	
 	@Listener
-	public void onEntityDeath(DestructEntityEvent event) {
-		if (event.getTargetEntity() instanceof Player) {
-			Player victim = (Player) event.getTargetEntity();
-			Optional<DamageSource> optDamageSource = event.getCause().first(DamageSource.class);
-			if (optDamageSource.isPresent()) {
-				
-				Optional<EPlayer> victim_player = this.plugin.getEServer().getEPlayer(victim);
-				if(victim_player.isPresent()) {
-					DamageSource damageSource = optDamageSource.get();
-					if (damageSource instanceof EntityDamageSource){
-						EntityDamageSource entityDamage = (EntityDamageSource) optDamageSource.get();
-						DamageType reason = damageSource.getType();
-						if (entityDamage.getSource() instanceof Player) {
-							Player killer = (Player) entityDamage.getSource();
-							if (!victim.equals(killer)) {
-								if(!victim_player.get().addDeath(killer, reason, System.currentTimeMillis())) {
-									killer.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.PLAYER_SPAWNKILL.get()
-											.replaceAll("<time>", this.plugin.getService().getCooldown().toString())));
-								}
-							}
-						} else {
-							victim_player.get().addDeath(entityDamage.getSource(), reason, System.currentTimeMillis());
-						}
+	public void onPlayerDeath(DestructEntityEvent.Death event) {
+		Optional<EPlayer> optVictim = this.plugin.getEServer().getEPlayer(event.getTargetEntity().getUniqueId());
+		if(optVictim.isPresent()) {
+			EPlayer victim = optVictim.get();
+			Optional<IndirectEntityDamageSource> optIndirectEntity = event.getCause().first(IndirectEntityDamageSource.class);
+			if(optIndirectEntity.isPresent()){
+				IndirectEntityDamageSource damageSource = optIndirectEntity.get();
+				sendDeath(victim, damageSource.getIndirectSource(), damageSource.getType());
+			} else {
+				Optional<BlockDamageSource> optBlockDamage = event.getCause().first(BlockDamageSource.class);
+				if(optBlockDamage.isPresent()){
+					BlockDamageSource damageSource = optBlockDamage.get();
+					sendDeath(victim, damageSource.getType());
+				} else {
+					Optional<FallingBlockDamageSource> optFallingBlock = event.getCause().first(FallingBlockDamageSource.class);
+					if(optFallingBlock.isPresent()){
+						FallingBlockDamageSource damageSource = optFallingBlock.get();
+						sendDeath(victim, damageSource.getSource(), damageSource.getType());
 					} else {
-						victim_player.get().addDeath(damageSource.getType(), System.currentTimeMillis());
+						Optional<EntityDamageSource> optEntityDamage = event.getCause().first(EntityDamageSource.class);
+						if(optEntityDamage.isPresent()){
+							EntityDamageSource damageSource = optEntityDamage.get();
+							sendDeath(victim, damageSource.getSource(), damageSource.getType());
+						} else {
+							Optional<DamageSource> optDamage = event.getCause().first(DamageSource.class);
+							if(optDamage.isPresent()){
+								DamageSource damageSource = optDamage.get();
+								sendDeath(victim, damageSource.getType());
+							}
+						}
 					}
 				}
 			}
-		}	
+		}
+	}
+	
+	private void sendDeath(EPlayer victim, Entity entity, DamageType reason){
+		if (entity instanceof Player) {
+			Player killer = (Player) entity;
+			if (!victim.equals(killer)) {
+				if(!victim.addDeath(killer, reason, System.currentTimeMillis())) {
+					killer.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.PLAYER_SPAWNKILL.get()
+							.replaceAll("<time>", this.plugin.getService().getCooldown().toString())));
+				}
+			}
+		} else {
+			victim.addDeath(entity, reason, System.currentTimeMillis());
+		}
+	}
+	
+	private void sendDeath(EPlayer victim, DamageType reason){
+		victim.addDeath(reason, System.currentTimeMillis());
 	}
 }
