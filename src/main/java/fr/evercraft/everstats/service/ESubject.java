@@ -197,7 +197,7 @@ public class ESubject implements StatsSubject {
 						+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
 						+ "WHERE `killer` = ? "
 						+ "AND `time` >= ("
-							+ "SELECT COALESCE(MAX(`time`),0) " 
+							+ "SELECT COALESCE(MAX(`time`), '1970-01-01 00:00:01.000000') " 
 							+ "FROM " + this.plugin.getDataBases().getTableDeath() + " "
 							+ "WHERE `victim` = ? "
 						+ ") ;";
