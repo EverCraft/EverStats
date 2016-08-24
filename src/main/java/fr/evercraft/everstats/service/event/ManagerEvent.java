@@ -43,11 +43,11 @@ public class ManagerEvent {
 	
 	public void post(UUID uuid, Entity killer, DamageType cause, Long time) {
 		Optional<EPlayer> player = this.plugin.getEServer().getEPlayer(uuid);
-		if(player.isPresent()) {
+		if (player.isPresent()) {
 			this.death(player.get(), killer, cause, time);
-			if(killer instanceof Player) {
+			if (killer instanceof Player) {
 				Optional<EPlayer> killer_player = this.plugin.getEServer().getEPlayer(uuid);
-				if(player.isPresent()) {
+				if (player.isPresent()) {
 					this.kill(player.get(), killer_player.get(), cause, time);
 				}
 			}
@@ -55,7 +55,7 @@ public class ManagerEvent {
 	}
 	
 	private void death(EPlayer victim, @Nullable Entity killer, DamageType damage, Long time) {
-		if(killer == null) {
+		if (killer == null) {
 			this.plugin.getLogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='null';damage='" + damage.getId() + "';time='" + time + "')");
 			this.plugin.getGame().getEventManager().post(new EDeathStatsUserEvent(victim, damage, time, Cause.source(this.plugin).build()));
 		} else {

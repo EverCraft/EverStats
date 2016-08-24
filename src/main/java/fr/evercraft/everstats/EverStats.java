@@ -52,7 +52,7 @@ public class EverStats extends EPlugin {
 		
 		// MySQL
 		this.databases = new ESDataBase(this);
-		if(!this.databases.isEnable()) {
+		if (!this.databases.isEnable()) {
 			throw new PluginDisableException("This plugin requires a database");
 		}
 		
@@ -77,7 +77,7 @@ public class EverStats extends EPlugin {
 		this.reloadConfigurations();
 		
 		this.databases.reload();
-		if(!this.databases.isEnable()) {
+		if (!this.databases.isEnable()) {
 			throw new PluginDisableException("This plugin requires a database");
 		}
 		

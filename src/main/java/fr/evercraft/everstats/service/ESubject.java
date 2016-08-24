@@ -231,7 +231,7 @@ public class ESubject implements StatsSubject {
 			preparedStatement = connection.prepareStatement(query);
 			preparedStatement.setString(1, this.identifier.toString());
 			ResultSet result = preparedStatement.executeQuery();
-			if(result.next()) {
+			if (result.next()) {
 				this.best_killstreaks = result.getInt("killstreaks");
 			} else {
 				this.insertKillstreaks(connection);
@@ -269,7 +269,7 @@ public class ESubject implements StatsSubject {
 	}
 	
 	private void addKillstreaks(){
-		if(this.killstreaks > this.best_killstreaks){
+		if (this.killstreaks > this.best_killstreaks){
 			this.best_killstreaks = this.killstreaks;
 			updateKillstreaks();
 		}
@@ -379,14 +379,14 @@ public class ESubject implements StatsSubject {
 				killer_name = killer.getUniqueId().toString();
 
 				// Si le cooldown n'a pas été respecté
-				if(!isCooldown(killer.getUniqueId(), time)) {
+				if (!isCooldown(killer.getUniqueId(), time)) {
 					return false;
 				}
 				
 				this.death_month.add(new EDeath(time, killer.getUniqueId()));
 				
 				Optional<ESubject> killer_subject = this.plugin.getService().getSubject(killer.getUniqueId());
-				if(killer_subject.isPresent()) {
+				if (killer_subject.isPresent()) {
 					killer_subject.get().addKill(time);
 				}
 			} else {
@@ -444,7 +444,7 @@ public class ESubject implements StatsSubject {
 		
 		while(cpt >= 0 && cpt < this.death_month.size() && !kill && !stop) {
 			EDeath kill_time = this.death_month.get(cpt);
-			if(kill_time.getTime() > time_cooldown) {
+			if (kill_time.getTime() > time_cooldown) {
 				kill = kill_time.getKiller().isPresent() && kill_time.getKiller().get().equals(killer);
 			} else {
 				stop = true;
