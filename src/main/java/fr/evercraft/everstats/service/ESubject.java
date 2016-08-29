@@ -398,11 +398,8 @@ public class ESubject implements StatsSubject {
 		}
 		this.death++;
 		this.killstreaks = 0;
-
 		
-		if (damage != null) {
-			cause = damage.getName();
-		}
+		cause = damage.getName();
 		
 		final String async_killer = killer_name;
 		final String async_cause = cause;
