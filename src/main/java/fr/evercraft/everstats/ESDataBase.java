@@ -49,7 +49,6 @@ public class ESDataBase extends EDataBase<EverStats> {
 
 	public boolean init() throws ServerDisableException {
 		this.table_death = "death";
-		this.table_killstreaks = "killstreaks";
 		String death = "CREATE TABLE IF NOT EXISTS <table> (" + 
 				"`id` int(11) NOT NULL AUTO_INCREMENT," + 
 				"`victim` varchar(36) NOT NULL," + 
@@ -57,13 +56,14 @@ public class ESDataBase extends EDataBase<EverStats> {
 				"`reason` varchar(36)," + 
 				"`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP," + 
 				"PRIMARY KEY (`id`));";
+		this.initTable(this.getTableDeath(), death);
 		
+		this.table_killstreaks = "killstreaks";
 		String killstreaks = "CREATE TABLE IF NOT EXISTS <table> (" + 
 				"`uuid` varchar(36) NOT NULL," + 
 				"`killstreaks` int(11) NOT NULL," + 
 				"PRIMARY KEY (`uuid`));";
-		initTable(this.getTableDeath(), death);
-		initTable(this.getTableKillstreaks(), killstreaks);
+		this.initTable(this.getTableKillstreaks(), killstreaks);
 		return true;
 	}
 
