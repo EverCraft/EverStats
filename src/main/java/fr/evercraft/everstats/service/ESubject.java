@@ -404,7 +404,7 @@ public class ESubject implements StatsSubject {
 		final String async_killer = killer_name;
 		final String async_cause = cause;
 		this.plugin.getGame().getScheduler().createTaskBuilder().async().execute(() -> saveDeath(async_killer, async_cause, time)).submit(this.plugin);
-		this.plugin.getManagerEvent().post(this.identifier, killer, damage, time);
+		this.plugin.getManagerEvent().post(this.identifier, Optional.ofNullable(killer), damage, time);
 		
 		return true;
 	}
