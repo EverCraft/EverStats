@@ -37,7 +37,7 @@ import fr.evercraft.everstats.service.event.ManagerEvent;
 		    @Dependency(id = "everapi", version = EverAPI.VERSION),
 		    @Dependency(id = "spongeapi", version = EverAPI.SPONGEAPI_VERSION)
 		})
-public class EverStats extends EPlugin {
+public class EverStats extends EPlugin<EverStats> {
 
 	private ESConfig configs;
 	private ESMessage messages;

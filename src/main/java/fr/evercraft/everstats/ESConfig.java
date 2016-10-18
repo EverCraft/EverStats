@@ -21,7 +21,7 @@ import java.util.Arrays;
 import fr.evercraft.everapi.plugin.file.EConfig;
 import fr.evercraft.everapi.plugin.file.EMessage;
 
-public class ESConfig extends EConfig {
+public class ESConfig extends EConfig<EverStats> {
 
 	public ESConfig(EverStats plugin) {
 		super(plugin);
