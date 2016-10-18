@@ -33,8 +33,8 @@ public class ESConfig extends EConfig {
 	}
 
 	public void loadDefault() {
-		addDefault("debug", false, "Displays plugin performance in the logs");
-		addDefault("language", EMessage.FRENCH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
+		addDefault("DEBUG", false, "Displays plugin performance in the logs");
+		addDefault("LANGUAGE", EMessage.FRENCH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
 		
 		addComment("SQL", 	"Save the user in a database : ",
 				" H2 : \"jdbc:h2:" + this.plugin.getPath().toAbsolutePath() + "/data\"",
@@ -43,6 +43,7 @@ public class ESConfig extends EConfig {
 		addDefault("SQL.enable", false);
 		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
 		addDefault("SQL.prefix", "everstats_");
+		
 		addDefault("top.banned", Arrays.asList(
 				"86f8f95b-e5e6-45c4-bf85-4d64dbd0903f", 
 				"f3345769-4c70-4a9f-9db9-bdb8f9e8a46c"));
