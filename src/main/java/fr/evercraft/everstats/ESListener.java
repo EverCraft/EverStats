@@ -30,7 +30,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDama
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
-import fr.evercraft.everapi.plugin.EChat;
 import fr.evercraft.everapi.server.player.EPlayer;
 import fr.evercraft.everstats.ESMessage.ESMessages;
 
@@ -107,8 +106,9 @@ public class ESListener {
 			Player killer = (Player) entity;
 			if (!victim.equals(killer)) {
 				if (!victim.addDeath(killer, reason, System.currentTimeMillis())) {
-					killer.sendMessage(EChat.of(ESMessages.PREFIX.get() + ESMessages.PLAYER_SPAWNKILL.get()
-							.replaceAll("<time>", this.plugin.getService().getCooldown().toString())));
+					ESMessages.PLAYER_SPAWNKILL.sender()
+						.replace("<time>", this.plugin.getService().getCooldown().toString())
+						.sendTo(killer);
 				}
 			}
 		} else {
