@@ -32,9 +32,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import fr.evercraft.everapi.java.Chronometer;
 import fr.evercraft.everapi.services.StatsService;
 import fr.evercraft.everapi.services.StatsSubject;
+import fr.evercraft.everapi.util.Chronometer;
 import fr.evercraft.everstats.EverStats;
 
 public class EStatsService implements StatsService {
