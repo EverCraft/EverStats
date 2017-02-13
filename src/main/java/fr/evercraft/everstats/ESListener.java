@@ -28,6 +28,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
 import fr.evercraft.everapi.server.player.EPlayer;
@@ -65,35 +66,33 @@ public class ESListener {
     }
 	
 	@Listener
-	public void onPlayerDeath(DestructEntityEvent.Death event) {
-		Optional<EPlayer> optVictim = this.plugin.getEServer().getEPlayer(event.getTargetEntity().getUniqueId());
-		if (optVictim.isPresent()) {
-			EPlayer victim = optVictim.get();
-			Optional<IndirectEntityDamageSource> optIndirectEntity = event.getCause().first(IndirectEntityDamageSource.class);
-			if (optIndirectEntity.isPresent()){
-				IndirectEntityDamageSource damageSource = optIndirectEntity.get();
-				sendDeath(victim, damageSource.getIndirectSource(), damageSource.getType());
+	public void onPlayerDeath(DestructEntityEvent.Death event, @Getter("getTargetEntity") Player player_sponge) {
+		EPlayer victim = this.plugin.getEServer().getEPlayer(player_sponge);
+		
+		Optional<IndirectEntityDamageSource> optIndirectEntity = event.getCause().first(IndirectEntityDamageSource.class);
+		if (optIndirectEntity.isPresent()){
+			IndirectEntityDamageSource damageSource = optIndirectEntity.get();
+			sendDeath(victim, damageSource.getIndirectSource(), damageSource.getType());
+		} else {
+			Optional<BlockDamageSource> optBlockDamage = event.getCause().first(BlockDamageSource.class);
+			if (optBlockDamage.isPresent()){
+				BlockDamageSource damageSource = optBlockDamage.get();
+				sendDeath(victim, damageSource.getType());
 			} else {
-				Optional<BlockDamageSource> optBlockDamage = event.getCause().first(BlockDamageSource.class);
-				if (optBlockDamage.isPresent()){
-					BlockDamageSource damageSource = optBlockDamage.get();
-					sendDeath(victim, damageSource.getType());
+				Optional<FallingBlockDamageSource> optFallingBlock = event.getCause().first(FallingBlockDamageSource.class);
+				if (optFallingBlock.isPresent()){
+					FallingBlockDamageSource damageSource = optFallingBlock.get();
+					sendDeath(victim, damageSource.getSource(), damageSource.getType());
 				} else {
-					Optional<FallingBlockDamageSource> optFallingBlock = event.getCause().first(FallingBlockDamageSource.class);
-					if (optFallingBlock.isPresent()){
-						FallingBlockDamageSource damageSource = optFallingBlock.get();
+					Optional<EntityDamageSource> optEntityDamage = event.getCause().first(EntityDamageSource.class);
+					if (optEntityDamage.isPresent()){
+						EntityDamageSource damageSource = optEntityDamage.get();
 						sendDeath(victim, damageSource.getSource(), damageSource.getType());
 					} else {
-						Optional<EntityDamageSource> optEntityDamage = event.getCause().first(EntityDamageSource.class);
-						if (optEntityDamage.isPresent()){
-							EntityDamageSource damageSource = optEntityDamage.get();
-							sendDeath(victim, damageSource.getSource(), damageSource.getType());
-						} else {
-							Optional<DamageSource> optDamage = event.getCause().first(DamageSource.class);
-							if (optDamage.isPresent()){
-								DamageSource damageSource = optDamage.get();
-								sendDeath(victim, damageSource.getType());
-							}
+						Optional<DamageSource> optDamage = event.getCause().first(DamageSource.class);
+						if (optDamage.isPresent()){
+							DamageSource damageSource = optDamage.get();
+							sendDeath(victim, damageSource.getType());
 						}
 					}
 				}

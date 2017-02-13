@@ -45,10 +45,8 @@ public class ManagerEvent {
 		if (player.isPresent()) {
 			this.death(player.get(), killer, cause, time);
 			if (killer.isPresent() && killer.get() instanceof Player) {
-				Optional<EPlayer> killer_player = this.plugin.getEServer().getEPlayer(killer.get().getUniqueId());
-				if (player.isPresent()) {
-					this.kill(player.get(), killer_player.get(), cause, time);
-				}
+				EPlayer killer_player = this.plugin.getEServer().getEPlayer((Player) killer.get());
+				this.kill(player.get(), killer_player, cause, time);
 			}
 		}
 	}
