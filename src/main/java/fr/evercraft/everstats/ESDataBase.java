@@ -100,12 +100,12 @@ public class ESDataBase extends EDataBase<EverStats> {
 				try {
 					players.put(UUID.fromString(result.getString("victim")), result.getDouble("death"));
 				} catch(IllegalArgumentException e) {
-					this.plugin.getLogger().warn("getTopDeaths : " + result.getString("victim"));
+					this.plugin.getELogger().warn("getTopDeaths : " + result.getString("victim"));
 				}
 			}
 			connection.close();
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during TopDeath (time='" + time + "';count='" + count + "') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error during TopDeath (time='" + time + "';count='" + count + "') : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -144,11 +144,11 @@ public class ESDataBase extends EDataBase<EverStats> {
 				try {
 					players.put(UUID.fromString(result.getString("killer")), result.getDouble("kill"));
 				} catch(IllegalArgumentException e) {
-					this.plugin.getLogger().warn("getTopKills : " + result.getString("killer"));
+					this.plugin.getELogger().warn("getTopKills : " + result.getString("killer"));
 				}
 			}
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during TopKill (time='" + time + "';count='" + count + "') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error during TopKill (time='" + time + "';count='" + count + "') : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -216,11 +216,11 @@ public class ESDataBase extends EDataBase<EverStats> {
 				try {
 					players.put(UUID.fromString(result.getString("uuid")), Math.ceil(result.getDouble("ratio")));
 				} catch(IllegalArgumentException e) {
-					this.plugin.getLogger().warn("getTopRatio : " + result.getString("ratio"));
+					this.plugin.getELogger().warn("getTopRatio : " + result.getString("ratio"));
 				}
 			}
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during TopRatio (time='" + time + "';count='" + count + "') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error during TopRatio (time='" + time + "';count='" + count + "') : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -256,12 +256,12 @@ public class ESDataBase extends EDataBase<EverStats> {
 				try {
 					players.put(UUID.fromString(result.getString("victim")), result.getDouble("death"));
 				} catch(IllegalArgumentException e) {
-					this.plugin.getLogger().warn("getTopKillstreaks : " + result.getString("victim"));
+					this.plugin.getELogger().warn("getTopKillstreaks : " + result.getString("victim"));
 				}
 			}
 			connection.close();
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during TopKillstreaks (';count='" + count + "') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error during TopKillstreaks (';count='" + count + "') : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {

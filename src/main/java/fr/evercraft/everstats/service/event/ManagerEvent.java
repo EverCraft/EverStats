@@ -36,7 +36,7 @@ public class ManagerEvent {
 	}
 	
 	public void reload() {
-		this.plugin.getLogger().debug("Event StatsReloadEvent");
+		this.plugin.getELogger().debug("Event StatsReloadEvent");
 		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsSystemEventReload(Cause.source(this.plugin).build()));
 	}
 	
@@ -53,15 +53,15 @@ public class ManagerEvent {
 	
 	private void death(EPlayer victim, Optional<Entity> killer, DamageType damage, Long time) {
 		if (killer.isPresent()) {
-			this.plugin.getLogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='" + killer.get().getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
+			this.plugin.getELogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='" + killer.get().getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
 		} else {
-			this.plugin.getLogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='null';damage='" + damage.getId() + "';time='" + time + "')");
+			this.plugin.getELogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='null';damage='" + damage.getId() + "';time='" + time + "')");
 		}
 		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsUserEventDeath(victim, time, damage, killer, Cause.source(this.plugin).build()));
 	}
 
 	private void kill(EPlayer victim, EPlayer killer, DamageType damage, Long time) {
-		this.plugin.getLogger().debug("Event StatsUserEvent.kill : (victim='" + victim.getUniqueId() + "';killer='" + killer.getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
+		this.plugin.getELogger().debug("Event StatsUserEvent.kill : (victim='" + victim.getUniqueId() + "';killer='" + killer.getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
 		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsUserEventKill(victim, time, damage, killer, Cause.source(this.plugin).build()));
 	}
 }

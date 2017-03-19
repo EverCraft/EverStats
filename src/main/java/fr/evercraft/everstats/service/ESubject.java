@@ -125,7 +125,7 @@ public class ESubject implements StatsSubject {
 				this.death = result.getInt("victim");
 			}
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error while loading data (uuid='" + this.identifier + "') : " + e.getMessage());
 		} finally {
 			try {
 				if (preparedStatement != null) {
@@ -153,7 +153,7 @@ public class ESubject implements StatsSubject {
 				this.kill_month.add(result.getTimestamp("time").getTime());
 			}
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "';type='kill_month') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error while loading data (uuid='" + this.identifier + "';type='kill_month') : " + e.getMessage());
 		} finally {
 			try {
 				if (preparedStatement != null) {
@@ -181,7 +181,7 @@ public class ESubject implements StatsSubject {
 				this.death_month.add(new EDeath(result.getTimestamp("time").getTime(), result.getString("killer")));
 			}
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "';type='death_month') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error while loading data (uuid='" + this.identifier + "';type='death_month') : " + e.getMessage());
 		} finally {
 			try {
 				if (preparedStatement != null) {
@@ -211,7 +211,7 @@ public class ESubject implements StatsSubject {
 				this.killstreaks = result.getInt("killstreaks");
 			}
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "';type='killstreaks') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error while loading data (uuid='" + this.identifier + "';type='killstreaks') : " + e.getMessage());
 		} finally {
 			try {
 				if (preparedStatement != null) {
@@ -237,7 +237,7 @@ public class ESubject implements StatsSubject {
 				this.insertKillstreaks(connection);
 			}
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error while loading data (uuid='" + this.identifier + "';type='killstreaks') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error while loading data (uuid='" + this.identifier + "';type='killstreaks') : " + e.getMessage());
 		} finally {
 			try {
 				if (preparedStatement != null) {
@@ -258,7 +258,7 @@ public class ESubject implements StatsSubject {
 			
 			preparedStatement.execute();
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of player : " + e.getMessage());
+	    	this.plugin.getELogger().warn("Error during a change of player : " + e.getMessage());
 		} finally {
 			try {
 				if (preparedStatement != null){
@@ -291,7 +291,7 @@ public class ESubject implements StatsSubject {
 		} catch (ServerDisableException e) {
 			e.execute();
 		} catch (SQLException e) {
-	    	this.plugin.getLogger().warn("Error during a change of player : " + e.getMessage());
+	    	this.plugin.getELogger().warn("Error during a change of player : " + e.getMessage());
 		} finally {
 			try {
 				if (preparedStatement != null){ 
@@ -314,7 +314,7 @@ public class ESubject implements StatsSubject {
 			preparedStatement.setString(2, this.identifier.toString());
 			preparedStatement.execute();
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during deleting (uuid='" + this.identifier + "'): " + e.getMessage());
+			this.plugin.getELogger().warn("Error during deleting (uuid='" + this.identifier + "'): " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -346,7 +346,7 @@ public class ESubject implements StatsSubject {
 			preparedStatement.setTimestamp(4, new Timestamp(time));
 			resultat = preparedStatement.execute();
 		} catch (SQLException e) {
-			this.plugin.getLogger().warn("Error during saving : (uuid='" + query + "';killer='" + name + "';reason='" + cause + "';time='" + time + "') : " + e.getMessage());
+			this.plugin.getELogger().warn("Error during saving : (uuid='" + query + "';killer='" + name + "';reason='" + cause + "';time='" + time + "') : " + e.getMessage());
 		} catch (ServerDisableException e) {
 			e.execute();
 		} finally {
@@ -420,7 +420,7 @@ public class ESubject implements StatsSubject {
 		this.kill++;
 		this.killstreaks++;
 		addKillstreaks();
-		this.plugin.getLogger().warn("Kill :  " + this.kill);
+		this.plugin.getELogger().warn("Kill :  " + this.kill);
 		
 	}
 	
