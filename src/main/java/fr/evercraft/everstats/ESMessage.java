@@ -31,9 +31,9 @@ public class ESMessage extends EMessage<EverStats> {
 	}
 
 	public enum ESMessages implements EnumMessage {
-		PREFIX("prefix", "[&4Ever&6&lStats&f] "),
-		DESCRIPTION("description", ""),
-		PLAYER_SPAWNKILL("message.PlayerSpawnkill", "&7Votre meurtre n'a pas été comptabilisé car vous avez tué ce joueur il y a moins de &6<time> &7seconde(s).");
+		PREFIX("PREFIX", "[&4Ever&6&lStats&f] "),
+		DESCRIPTION("DESCRIPTION", ""),
+		PLAYER_SPAWNKILL("messagePlayerSpawnkill", "&7Votre meurtre n'a pas été comptabilisé car vous avez tué ce joueur il y a moins de &6<time> &7seconde(s).");
 		
 		private final String path;
 	    private final EMessageBuilder french;
