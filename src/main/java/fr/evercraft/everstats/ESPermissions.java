@@ -24,9 +24,9 @@ import fr.evercraft.everapi.plugin.EnumPermission;
 
 public enum ESPermissions implements EnumPermission {
 	
-	EVERSTATS("command"),
-	HELP("help"),
-	RELOAD("reload");
+	EVERSTATS("commands.execute"),
+	HELP("commands.help"),
+	RELOAD("commands.reload");
 	
 	private final static String prefix = "everstats";
 	
