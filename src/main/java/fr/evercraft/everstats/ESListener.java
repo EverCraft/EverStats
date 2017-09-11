@@ -106,7 +106,7 @@ public class ESListener {
 			if (!victim.equals(killer)) {
 				if (!victim.addDeath(killer, reason, System.currentTimeMillis())) {
 					ESMessages.PLAYER_SPAWNKILL.sender()
-						.replace("<time>", this.plugin.getService().getCooldown().toString())
+						.replace("{time}", this.plugin.getService().getCooldown().toString())
 						.sendTo(killer);
 				}
 			}
