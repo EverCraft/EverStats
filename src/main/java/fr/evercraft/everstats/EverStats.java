@@ -21,6 +21,7 @@ import org.spongepowered.api.plugin.Plugin;
 
 import fr.evercraft.everapi.EverAPI;
 import fr.evercraft.everapi.exception.PluginDisableException;
+import fr.evercraft.everapi.exception.ServerDisableException;
 import fr.evercraft.everapi.plugin.EPlugin;
 import fr.evercraft.everapi.services.StatsService;
 import fr.evercraft.everstats.command.sub.ESReload;
@@ -74,9 +75,8 @@ public class EverStats extends EPlugin<EverStats> {
 	}
 	
 	@Override
-	protected void onReload() throws PluginDisableException {
-		// Configurations
-		this.reloadConfigurations();
+	protected void onReload() throws PluginDisableException, ServerDisableException {
+		super.onReload();
 		
 		this.databases.reload();
 		if (!this.databases.isEnable()) {

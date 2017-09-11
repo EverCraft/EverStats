@@ -19,7 +19,6 @@ package fr.evercraft.everstats;
 import java.util.Arrays;
 
 import fr.evercraft.everapi.plugin.file.EConfig;
-import fr.evercraft.everapi.plugin.file.EMessage;
 
 public class ESConfig extends EConfig<EverStats> {
 
@@ -33,16 +32,8 @@ public class ESConfig extends EConfig<EverStats> {
 	}
 
 	public void loadDefault() {
-		addDefault("DEBUG", false, "Displays plugin performance in the logs");
-		addDefault("LANGUAGE", EMessage.FRENCH, "Select language messages", "Examples : ", "  French : FR_fr", "  English : EN_en");
-		
-		addComment("SQL", 	"Save the user in a database : ",
-				" H2 : \"jdbc:h2:" + this.plugin.getPath().toAbsolutePath() + "/data\"",
-				" SQL : \"jdbc:mysql://[login[:password]@]<host>:<port>/<database>\"",
-				" Default users are saving in the 'data'");
-		addDefault("SQL.enable", false);
-		addDefault("SQL.url", "jdbc:mysql://root:password@localhost:3306/minecraft");
-		addDefault("SQL.prefix", "everstats_");
+		this.configDefault();
+		this.sqlDefault();
 		
 		addDefault("top.banned", Arrays.asList(
 				"86f8f95b-e5e6-45c4-bf85-4d64dbd0903f", 
