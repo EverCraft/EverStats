@@ -31,13 +31,13 @@ public class ESMessage extends EMessage<EverStats> {
 	}
 
 	public enum ESMessages implements EnumMessage {
-		PREFIX("PREFIX", "[&4Ever&6&lStats&f] "),
-		DESCRIPTION("DESCRIPTION", ""),
-		PLAYER_SPAWNKILL("messagePlayerSpawnkill", "&7Votre meurtre n'a pas été comptabilisé car vous avez tué ce joueur il y a moins de &6{time} &7seconde(s)."),
+		PREFIX(				"[&4Ever&6&lStats&f] "),
+		DESCRIPTION(		""),
+		PLAYER_SPAWNKILL(	"&7Votre meurtre n'a pas été comptabilisé car vous avez tué ce joueur il y a moins de &6{time} &7seconde(s)."),
 		
-		PERMISSIONS_COMMANDS_EXECUTE("permissionsCommandsExecute", ""),
-		PERMISSIONS_COMMANDS_HELP("permissionsCommandsHelp", ""),
-		PERMISSIONS_COMMANDS_RELOAD("permissionsCommandsReload", "");
+		PERMISSIONS_COMMANDS_EXECUTE(""),
+		PERMISSIONS_COMMANDS_HELP(""),
+		PERMISSIONS_COMMANDS_RELOAD("");
 		
 		private final String path;
 	    private final EMessageBuilder french;
@@ -45,24 +45,23 @@ public class ESMessage extends EMessage<EverStats> {
 	    private EMessageFormat message;
 	    private EMessageBuilder builder;
 	    
-	    private ESMessages(final String path, final String french) {   	
-	    	this(path, EMessageFormat.builder().chat(new EFormatString(french), true));
+	    private ESMessages(final String french) {   	
+	    	this(EMessageFormat.builder().chat(new EFormatString(french), true));
 	    }
 	    
-	    private ESMessages(final String path, final String french, final String english) {   	
-	    	this(path, 
-	    		EMessageFormat.builder().chat(new EFormatString(french), true), 
+	    private ESMessages(final String french, final String english) {   	
+	    	this(EMessageFormat.builder().chat(new EFormatString(french), true), 
 	    		EMessageFormat.builder().chat(new EFormatString(english), true));
 	    }
 	    
-	    private ESMessages(final String path, final EMessageBuilder french) {   	
-	    	this(path, french, french);
+	    private ESMessages(final EMessageBuilder french) {   	
+	    	this(french, french);
 	    }
 	    
-	    private ESMessages(final String path, final EMessageBuilder french, final EMessageBuilder english) {
+	    private ESMessages(final EMessageBuilder french, final EMessageBuilder english) {
 	    	Preconditions.checkNotNull(french, "Le message '" + this.name() + "' n'est pas définit");
 	    	
-	    	this.path = path;	    	
+	    	this.path = this.resolvePath();	    	
 	    	this.french = french;
 	    	this.english = english;
 	    	this.message = french.build();
