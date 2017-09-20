@@ -99,6 +99,10 @@ public class EverStats extends EPlugin<EverStats> {
 		return this.messages;
 	}
 	
+	public ESPermissions[] getPermissions() {
+		return ESPermissions.values();
+	}
+	
 	public ESDataBase getDataBases(){
 		return this.databases;
 	}
