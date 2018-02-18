@@ -21,7 +21,6 @@ import java.util.UUID;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
 import fr.evercraft.everapi.event.ESpongeEventFactory;
@@ -37,7 +36,7 @@ public class ManagerEvent {
 	
 	public void reload() {
 		this.plugin.getELogger().debug("Event StatsReloadEvent");
-		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsSystemEventReload(Cause.source(this.plugin).build()));
+		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsSystemEventReload(this.plugin.getCurrentCause()));
 	}
 	
 	public void post(UUID uuid, Optional<Entity> killer, DamageType cause, Long time) {
@@ -57,11 +56,11 @@ public class ManagerEvent {
 		} else {
 			this.plugin.getELogger().debug("Event StatsUserEvent.Death : (victim='" + victim.getUniqueId() + "';killer='null';damage='" + damage.getId() + "';time='" + time + "')");
 		}
-		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsUserEventDeath(victim, time, damage, killer, Cause.source(this.plugin).build()));
+		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsUserEventDeath(victim, time, damage, killer, this.plugin.getCurrentCause()));
 	}
 
 	private void kill(EPlayer victim, EPlayer killer, DamageType damage, Long time) {
 		this.plugin.getELogger().debug("Event StatsUserEvent.kill : (victim='" + victim.getUniqueId() + "';killer='" + killer.getUniqueId() + "';damage='" + damage.getId() + "';time='" + time + "')");
-		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsUserEventKill(victim, time, damage, killer, Cause.source(this.plugin).build()));
+		this.plugin.getGame().getEventManager().post(ESpongeEventFactory.createStatsUserEventKill(victim, time, damage, killer, this.plugin.getCurrentCause()));
 	}
 }
